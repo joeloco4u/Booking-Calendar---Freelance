@@ -37,7 +37,7 @@ export const extractDay = (rawDate: string) => {
 
 export const formatDisplayDate = (raw: string) => {
   if (!raw) return '';
-  const match = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); // matches DD/MM/YYYY
+  const match = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (match) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${months[parseInt(match[2], 10) - 1]} ${match[1]}, ${match[3]}`;
@@ -46,5 +46,5 @@ export const formatDisplayDate = (raw: string) => {
     const d = new Date(raw);
     if (!isNaN(d.getTime())) return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   } catch(e) {}
-  return raw; // fallback
+  return raw;
 };

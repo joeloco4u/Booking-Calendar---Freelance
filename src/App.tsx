@@ -1,17 +1,13 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Layout from './components/Layout'
 import Calendar from './components/Calendar'
 import ReservationForm from './components/ReservationForm'
 import AdminDashboard from './components/AdminDashboard'
+import FacilityLanding from './components/FacilityLanding'
+import LandingPage from './components/LandingPage'
+import ViewToggle from './components/ViewToggle'
 import { fetchMonthData, type MonthDataRow } from './services/api'
-
-const VIEW_CONFIG: Record<string, { title: string; subtitle: string }> = {
-  calendar: { title: 'Booking Calendar', subtitle: 'Select a date to request a booking' },
-}
-
-const ADMIN_VIEW_CONFIG: Record<string, { title: string; subtitle: string }> = {
-  dashboard: { title: 'Admin Dashboard', subtitle: 'Manage all pool booking requests' },
-}
+import { translations, type Lang } from './i18n'
 
 const MONTH_NAMES_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -19,8 +15,9 @@ const MONTH_NAMES_ES = [
 ]
 
 export default function App() {
-  const [activeView, setActiveView] = useState('calendar')
+  const [siteView, setSiteView] = useState<'landing' | 'app'>('landing')
   const [role, setRole] = useState<'freelancer' | 'admin'>('freelancer')
+  const [lang, setLang] = useState<Lang>('es')
   const [selectedDate, setSelectedDate] = useState<number | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -101,9 +98,22 @@ export default function App() {
   }
 
   const isAdmin = role === 'admin'
+  const t = translations[lang]
   const config = isAdmin
-    ? (ADMIN_VIEW_CONFIG[activeView] ?? ADMIN_VIEW_CONFIG.dashboard)
-    : (VIEW_CONFIG[activeView] ?? VIEW_CONFIG.dashboard)
+    ? { title: t.header.adminTitle, subtitle: t.header.adminSubtitle }
+    : { title: t.header.userTitle, subtitle: t.header.userSubtitle }
+
+  const bookingRef = useRef<HTMLElement | null>(null)
+  const handleBookNow = useCallback(() => {
+    if (siteView !== 'app') {
+      setSiteView('app')
+      setTimeout(() => {
+        bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 150)
+      return
+    }
+    bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [siteView])
 
   const handleSelectDate = (day: number, month: number, year: number) => {
     setSelectedDate(day)
@@ -113,50 +123,66 @@ export default function App() {
   }
 
   return (
-    <Layout
-      activeView={activeView}
-      onNavigate={setActiveView}
-      headerTitle={config.title}
-      headerSubtitle={config.subtitle}
-      role={role}
-      onRoleChange={setRole}
-    >
-      {isAdmin ? (
-        <AdminDashboard
-          monthData={monthData}
-          onMonthDataChange={setMonthData}
-          currentMonthStr={currentMonthStr}
-          onRefresh={refreshData}
-        />
+    <>
+      {siteView === 'landing' ? (
+        <LandingPage lang={lang} onLangChange={setLang} onBookNow={handleBookNow} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3">
-            <Calendar
-              viewDate={viewDate}
-              onPrevMonth={handlePrevMonth}
-              onNextMonth={handleNextMonth}
-              selectedDate={selectedDate}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              onSelectDate={handleSelectDate}
+        <Layout
+          headerTitle={config.title}
+          headerSubtitle={config.subtitle}
+          role={role}
+          lang={lang}
+          onLangChange={setLang}
+          onRoleChange={setRole}
+          onBookNow={handleBookNow}
+        >
+          {isAdmin ? (
+            <AdminDashboard
               monthData={monthData}
-              isLoading={isLoading}
-            />
-          </div>
-          <div className="lg:col-span-2">
-            <ReservationForm
-              selectedDate={selectedDate}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              schedule={schedule}
-              onScheduleChange={setSchedule}
-              monthData={monthData}
+              onMonthDataChange={setMonthData}
               currentMonthStr={currentMonthStr}
               onRefresh={refreshData}
+              lang={lang}
             />
-          </div>
-        </div>
+          ) : (
+            <>
+              <FacilityLanding lang={lang} />
+              <section
+                ref={bookingRef}
+                id="booking"
+                className="grid grid-cols-1 lg:grid-cols-2 items-stretch gap-6 scroll-mt-6"
+              >
+                <Calendar
+                  viewDate={viewDate}
+                  onPrevMonth={handlePrevMonth}
+                  onNextMonth={handleNextMonth}
+                  selectedDate={selectedDate}
+                  selectedMonth={selectedMonth}
+                  selectedYear={selectedYear}
+                  onSelectDate={handleSelectDate}
+                  monthData={monthData}
+                  isLoading={isLoading}
+                  schedule={schedule}
+                  onScheduleChange={setSchedule}
+                  lang={lang}
+                />
+                <ReservationForm
+                  selectedDate={selectedDate}
+                  selectedMonth={selectedMonth}
+                  selectedYear={selectedYear}
+                  schedule={schedule}
+                  onScheduleChange={setSchedule}
+                  monthData={monthData}
+                  currentMonthStr={currentMonthStr}
+                  onRefresh={refreshData}
+                  lang={lang}
+                />
+              </section>
+            </>
+          )}
+        </Layout>
       )}
-    </Layout>
+      <ViewToggle view={siteView} onChange={setSiteView} />
+    </>
   )
 }
