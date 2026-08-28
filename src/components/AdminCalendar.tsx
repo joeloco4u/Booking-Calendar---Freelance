@@ -15,6 +15,7 @@ interface AdminCalendarProps {
   currentMonthStr: string
   onRefresh: () => void
   lang: Lang
+  fee?: number
 }
 
 const STATUS_PILL: Record<string, { pill: string; dot: string }> = {
@@ -45,6 +46,7 @@ export default function AdminCalendar({
   currentMonthStr,
   onRefresh,
   lang,
+  fee = 60,
 }: AdminCalendarProps) {
   const t = translations[lang]
   const [selected, setSelected] = useState<{ day: number; month: number; year: number } | null>(
@@ -184,7 +186,7 @@ export default function AdminCalendar({
                       <p className="mt-2 text-xs text-[#64748B]">{row.email}</p>
                     )}
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-white tabular-nums">${row.fee}.00</p>
+                      <p className="text-sm font-bold text-white tabular-nums">${row.fee > 0 ? row.fee : fee}.00</p>
                       {status === 'pending' && (
                         <div className="flex items-center gap-2">
                           <button

@@ -12,6 +12,7 @@ interface AdminBookingsProps {
   onRefresh: () => void
   lang: Lang
   rules: string[]
+  fee?: number
 }
 
 const STATUS_BADGE: Record<string, { pill: string; dot: string }> = {
@@ -40,6 +41,7 @@ export default function AdminBookings({
   onRefresh,
   lang,
   rules,
+  fee = 60,
 }: AdminBookingsProps) {
   const t = translations[lang]
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending')
@@ -255,7 +257,7 @@ export default function AdminBookings({
                 <div>
                   <p className={cellLabel}>{t.admin.colAmount}</p>
                   <p className="text-sm font-semibold text-white tabular-nums leading-tight">
-                    ${row.fee}.00
+                    ${row.fee > 0 ? row.fee : fee}.00
                   </p>
                 </div>
 

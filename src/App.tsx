@@ -191,6 +191,7 @@ export default function App() {
                 onRefresh={refreshData}
                 lang={lang}
                 rules={rules}
+                fee={fee}
               />
             ) : adminSection === 'calendar' ? (
               <AdminCalendar
@@ -202,6 +203,7 @@ export default function App() {
                 currentMonthStr={currentMonthStr}
                 onRefresh={refreshData}
                 lang={lang}
+                fee={fee}
               />
             ) : adminSection === 'users' ? (
               <AdminUsers monthData={monthData} lang={lang} fee={fee} />

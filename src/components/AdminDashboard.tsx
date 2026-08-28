@@ -191,6 +191,7 @@ export default function AdminDashboard({
           onRefresh={onRefresh}
           lang={lang}
           rules={rules}
+          fee={fee}
         />
       </div>
     </div>
