@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Clock, DollarSign, CalendarCheck, Check, X, ChevronRight, Lock } from 'lucide-react'
+import { Clock, DollarSign, CalendarCheck, Check, X, ChevronLeft, ChevronRight, Lock } from 'lucide-react'
 import { approveBooking, rejectBooking } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { formatDisplayDate } from '../utils/date'
@@ -11,6 +11,8 @@ interface AdminDashboardProps {
   currentMonthStr: string
   onRefresh: () => void
   lang: Lang
+  viewDate: Date
+  setViewDate: React.Dispatch<React.SetStateAction<Date>>
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -34,6 +36,8 @@ export default function AdminDashboard({
   currentMonthStr,
   onRefresh,
   lang,
+  viewDate,
+  setViewDate,
 }: AdminDashboardProps) {
   const t = translations[lang]
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -42,6 +46,14 @@ export default function AdminDashboard({
   const [detailTarget, setDetailTarget] = useState<MonthDataRow | null>(null)
   const [rejectTarget, setRejectTarget] = useState<MonthDataRow | null>(null)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
+
+  const handlePrevMonth = () => {
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
+  }
 
   const pendingRequests = useMemo(
     () => monthData.filter((r) => r.status?.toLowerCase() === 'pending'),
@@ -183,6 +195,27 @@ export default function AdminDashboard({
 
   return (
     <div className="rounded-3xl bg-marine/95 backdrop-blur-xl border border-white/10 p-5 md:p-7 shadow-[0_30px_60px_-24px_rgba(11,25,44,0.9)] animate-fade-in-up">
+      <div className="flex items-center justify-between gap-4 bg-white/[0.04] p-4 rounded-xl border border-white/10 mb-6">
+        <h2 className="text-lg font-semibold text-slate-200">Admin Dashboard</h2>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handlePrevMonth}
+            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="text-white font-medium min-w-[130px] text-center">{currentMonthStr}</span>
+          <button
+            onClick={handleNextMonth}
+            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {kpiCards.map((card, idx) => {
           const Icon = card.icon

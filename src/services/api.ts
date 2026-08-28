@@ -1,4 +1,4 @@
-export const GAS_URL = 'https://script.google.com/macros/s/AKfycbx56nG_dNVFFSwq5OhE7CL61jI8qo2REcGDOqOUg5FPnh2ZrsKJfnFCTkkS6dwL-Xf8_A/exec'
+export const GAS_URL = 'https://script.google.com/macros/s/AKfycbyffs5W_V-sS0FVY0uxpA99N2YtxlSuUPU8w3dVf3N9zEvbBONZ6Y1K4EPadAFsXzoWQw/exec'
 
 export interface MonthDataRow {
   rowIndex: number
@@ -22,7 +22,7 @@ export async function fetchMonthData(mes: string): Promise<MonthDataRow[]> {
 }
 
 export async function submitBooking(payload: {
-  fullName: string
+  name: string
   fee: number
   row: number
   mes: string

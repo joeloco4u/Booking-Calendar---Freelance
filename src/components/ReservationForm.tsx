@@ -139,7 +139,7 @@ export default function ReservationForm({
 
     setIsSubmitting(true)
     submitBooking({
-      fullName: fullName.trim(),
+      name: fullName.trim(),
       fee: FEE,
       row: matchedRow.rowIndex,
       mes: currentMonthStr,
