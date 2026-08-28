@@ -14,6 +14,7 @@ import {
 import { submitBooking } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { getDayType, getAvailableSchedules } from '../utils/schedule'
+import { extractDay } from '../utils/date'
 import { translations, type Lang } from '../i18n'
 import poolThumb from '../images/IMG_5622-_1_.png'
 
@@ -112,6 +113,8 @@ export default function ReservationForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [step, setStep] = useState<'preview' | 'details'>('preview')
+  const [phoneError, setPhoneError] = useState(false)
+  const [emailError, setEmailError] = useState(false)
 
   const dayType = getDayType(selectedDate, selectedMonth, selectedYear)
   const isWeekdaySelected = dayType === 'weekday'
@@ -120,23 +123,37 @@ export default function ReservationForm({
 
   const safeData = Array.isArray(monthData) ? monthData : []
 
+  const PHONE_MAX_LEN = 15
+
+  const validatePhone = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return false
+    const digits = (trimmed.match(/\d/g) || []).length
+    const validChars = /^\+?[\d\s-]*$/.test(trimmed)
+    return digits >= 7 && trimmed.length <= PHONE_MAX_LEN && validChars
+  }
+
+  const validateEmail = (value: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+  }
+
+  const handlePhoneChange = (value: string) => {
+    const sanitized = value.replace(/[^\d\s+-]/g, '').slice(0, PHONE_MAX_LEN)
+    setPhone(sanitized)
+    setPhoneError(sanitized !== '' && !validatePhone(sanitized))
+  }
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value)
+    setEmailError(value !== '' && !validateEmail(value))
+  }
+
   const matchedRow = useMemo(() => {
     if (selectedDate === null) return null
     const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '')
     const found = safeData.find((row) => {
       if (!row.date || !row.schedule) return false
-
-      let rowDay: number | null = null
-      if (row.date.includes('/')) {
-        const dateParts = row.date.split(' ')
-        if (dateParts.length >= 2) {
-          rowDay = parseInt(dateParts[1].split('/')[0], 10)
-        }
-      } else {
-        rowDay = new Date(row.date).getDate()
-      }
-
-      return rowDay === selectedDate && normalize(row.schedule) === normalize(schedule)
+      return extractDay(row.date) === selectedDate && normalize(row.schedule) === normalize(schedule)
     })
     return found ?? null
   }, [selectedDate, schedule, safeData])
@@ -147,6 +164,8 @@ export default function ReservationForm({
     !isWeekdaySelected &&
     matchedRow !== null &&
     fullName.trim() !== '' &&
+    validatePhone(phone) &&
+    validateEmail(email) &&
     rulesAccepted
 
   const availableSchedules = getAvailableSchedules(dayType)
@@ -159,6 +178,25 @@ export default function ReservationForm({
         : dayType === 'sunday'
           ? t.booking.dayHintSunday
           : ''
+
+  const isSlotOccupied = (scheduleValue: string) => {
+    if (selectedDate === null) return false
+    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '')
+    const row = safeData.find(
+      (r) =>
+        r.schedule &&
+        extractDay(r.date) === selectedDate &&
+        normalize(r.schedule) === normalize(scheduleValue),
+    )
+    return row ? row.status !== 'Available' : false
+  }
+
+  useEffect(() => {
+    if (schedule && isSlotOccupied(schedule)) {
+      onScheduleChange('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schedule, safeData, selectedDate, selectedMonth, selectedYear])
 
   useEffect(() => {
     setStep('preview')
@@ -187,6 +225,8 @@ export default function ReservationForm({
         setEmail('')
         setExtras([])
         setRulesAccepted(false)
+        setPhoneError(false)
+        setEmailError(false)
         onScheduleChange('')
         setStatus('success')
         setStep('preview')
@@ -289,12 +329,16 @@ export default function ReservationForm({
                   placeholder=" "
                   autoComplete="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={floatingInput}
+                  maxLength={15}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  className={`${floatingInput} ${phoneError ? 'border-red-400/70 focus:ring-red-400/60' : ''}`}
                 />
                 <label htmlFor="phone" className={floatingLabel}>
                   {t.booking.phoneLabel}
                 </label>
+                {phoneError && (
+                  <p className="mt-1 text-xs text-red-400">{t.booking.phoneInvalid}</p>
+                )}
               </div>
 
               <div className="relative">
@@ -304,12 +348,15 @@ export default function ReservationForm({
                   placeholder=" "
                   autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={floatingInput}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  className={`${floatingInput} ${emailError ? 'border-red-400/70 focus:ring-red-400/60' : ''}`}
                 />
                 <label htmlFor="email" className={floatingLabel}>
                   {t.booking.emailLabel}
                 </label>
+                {emailError && (
+                  <p className="mt-1 text-xs text-red-400">{t.booking.emailInvalid}</p>
+                )}
               </div>
 
               <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4">
@@ -396,20 +443,28 @@ export default function ReservationForm({
           <div className="mt-3 grid grid-cols-1 gap-2.5">
             {availableSchedules.map((opt) => {
               const active = schedule === opt.value
+              const occupied = isSlotOccupied(opt.value)
               return (
                 <button
                   key={opt.value}
-                  onClick={() => onScheduleChange(opt.value)}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
-                    active
-                      ? 'border-[#1895C7] bg-[#1895C7]/15 ring-1 ring-[#1895C7]/30'
-                      : 'border-white/10 bg-white/[0.05] hover:border-white/15 hover:bg-white/[0.08]'
+                  onClick={() => !occupied && onScheduleChange(opt.value)}
+                  disabled={occupied}
+                  aria-disabled={occupied}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all duration-200 ${
+                    occupied
+                      ? 'opacity-50 cursor-not-allowed bg-white/[0.03] border-white/10'
+                      : active
+                        ? 'border-[#1895C7] bg-[#1895C7]/15 ring-1 ring-[#1895C7]/30 cursor-pointer'
+                        : 'border-white/10 bg-white/[0.05] hover:border-white/15 hover:bg-white/[0.08] cursor-pointer'
                   }`}
                 >
-                  <span className={`w-2.5 h-2.5 rounded-full ${opt.dot} shrink-0`} />
+                  <span className={`w-2.5 h-2.5 rounded-full ${opt.dot} shrink-0 ${occupied ? 'opacity-60' : ''}`} />
                   <span className="flex-1">
                     <span className="block text-sm font-bold text-white">
                       {opt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight}
+                      {occupied && (
+                        <span className="text-xs font-medium text-red-400/80 ml-1">(Ocupado)</span>
+                      )}
                     </span>
                     <span className={`block text-xs ${active ? 'text-[#E2E8F0]' : 'text-[#E2E8F0]/75'}`}>
                       {opt.hours}
@@ -417,10 +472,10 @@ export default function ReservationForm({
                   </span>
                   <span
                     className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                      active ? 'border-[#1895C7]' : 'border-white/25'
+                      occupied ? 'border-white/15' : active ? 'border-[#1895C7]' : 'border-white/25'
                     }`}
                   >
-                    {active && <span className="w-2.5 h-2.5 rounded-full bg-[#1895C7]" />}
+                    {active && !occupied && <span className="w-2.5 h-2.5 rounded-full bg-[#1895C7]" />}
                   </span>
                 </button>
               )
