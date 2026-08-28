@@ -132,7 +132,7 @@ export default function AdminDashboard({
           />
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-cta to-cyan-glow hover:brightness-110 active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer shadow-[0_8px_20px_-6px_rgba(24,149,199,0.7)]"
+            className="w-full bg-[#0E253A] border border-[#1895C7]/50 hover:border-[#20B1EE] hover:bg-[#12304f] active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer"
           >
             {t.admin.unlock}
           </button>
@@ -184,11 +184,11 @@ export default function AdminDashboard({
   return (
     <div className="rounded-3xl bg-marine/95 backdrop-blur-xl border border-white/10 p-5 md:p-7 shadow-[0_30px_60px_-24px_rgba(11,25,44,0.9)] animate-fade-in-up">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {kpiCards.map((card) => {
+        {kpiCards.map((card, idx) => {
           const Icon = card.icon
           return (
             <div
-              key={card.label}
+              key={idx}
               className="rounded-2xl bg-white/[0.05] border border-white/10 p-5 hover:scale-[1.02] hover:border-white/20 transition-all duration-200"
             >
               <div className="flex items-center justify-between">
@@ -263,7 +263,7 @@ export default function AdminDashboard({
                   className={`${gridCols} group px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:border-cyan-glow/40 hover:bg-white/[0.07] hover:scale-[1.005] transition-all duration-200 cursor-pointer`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-cta to-cyan-glow flex items-center justify-center text-xs font-bold text-white shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#0E253A] border border-[#20B1EE]/40 flex items-center justify-center text-xs font-bold text-cyan-glow shrink-0">
                       {row.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                     </div>
                     <span className="text-sm font-semibold text-white truncate">{row.name}</span>
@@ -339,7 +339,7 @@ export default function AdminDashboard({
             </div>
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-cta to-cyan-glow flex items-center justify-center text-sm font-bold text-white">
+                <div className="w-12 h-12 rounded-2xl bg-[#0E253A] border border-[#20B1EE]/40 flex items-center justify-center text-sm font-bold text-cyan-glow">
                   {detailTarget.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div>
@@ -430,7 +430,7 @@ export default function AdminDashboard({
               <button
                 onClick={confirmReject}
                 disabled={actionLoading !== null}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-sm font-bold text-white hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_24px_-8px_rgba(239,68,68,0.7)]"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-sm font-bold text-white hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading !== null ? t.admin.rejectProcessing : t.admin.rejectConfirm}
               </button>

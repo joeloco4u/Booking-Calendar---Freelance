@@ -158,6 +158,13 @@ const es = {
     includedViewSub: 'La reserva cuenta con acceso y uso de los siguientes equipos.',
     notIncludedViewTitle: 'Lo que NO Incluye el Alquiler',
     notIncludedViewSub: 'El usuario debe traer sus propios insumos consumibles.',
+    includedNotLabel: 'No incluye',
+    includedCards: [
+      { tag: 'Incluido', title: 'Acceso a', highlight: 'Instalaciones', desc: 'Piscina y área común con baño equipado, listos para todo tu grupo.' },
+      { tag: 'Equipamiento', title: 'Cocina', highlight: 'Equipada', desc: 'Microondas y air fryer para calentar comida y snacks cuando quieras.' },
+      { tag: 'Extras', title: 'Parrillera y', highlight: 'Juegos', desc: 'Pide la parrillera, dominó o mesa de ping pong sin costo extra.' },
+      { tag: 'Comodidad', title: 'Cava y', highlight: 'Agua Filtrada', desc: 'Cava para hielo y agua fresca lista durante todo tu turno.' },
+    ],
     notIncluded: [
       { item: 'Vasos', note: 'Trae los tuyos' },
       { item: 'Platos', note: 'Trae los tuyos' },
@@ -379,6 +386,13 @@ function makeEn(): typeof es {
       includedViewSub: 'The booking includes access and use of the following equipment.',
       notIncludedViewTitle: 'Not Included',
       notIncludedViewSub: 'The user must bring their own consumables.',
+      includedNotLabel: 'Not included',
+      includedCards: [
+        { tag: 'Included', title: 'Full access to', highlight: 'Facilities', desc: 'Pool and common area with equipped bathroom, ready for your whole group.' },
+        { tag: 'Equipment', title: 'Ready', highlight: 'Kitchen', desc: 'Microwave and air fryer to warm up food and snacks anytime.' },
+        { tag: 'Extras', title: 'Grill &', highlight: 'Games', desc: 'Request the grill, dominoes or ping pong table at no extra cost.' },
+        { tag: 'Comfort', title: 'Cooler &', highlight: 'Filtered Water', desc: 'Ice cooler and fresh filtered water throughout your slot.' },
+      ],
       notIncluded: [
         { item: 'Cups', note: 'Bring your own' },
         { item: 'Plates', note: 'Bring your own' },

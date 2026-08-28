@@ -185,7 +185,7 @@ export default function ReservationForm({
 
   return (
     <div className="h-full space-y-4 animate-fade-in-up">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-cta to-cyan-glow p-5 shadow-[0_20px_40px_-16px_rgba(24,149,199,0.8)]">
+      <div className="relative overflow-hidden rounded-2xl bg-[#0E253A] border border-[#20B1EE]/25 p-5 shadow-[0_20px_40px_-20px_rgba(8,19,34,0.7)]">
         <div className="absolute -top-16 -right-10 w-52 h-40 bg-white/15 rounded-full blur-[70px]" />
         <div className="relative flex items-center justify-between gap-4">
           <div>
@@ -327,7 +327,7 @@ export default function ReservationForm({
             disabled={!canSubmit}
             className={`w-full h-12 flex items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all duration-200 ${
               canSubmit
-                ? 'bg-gradient-to-r from-cyan-cta to-cyan-glow text-white shadow-[0_12px_28px_-8px_rgba(24,149,199,0.8)] hover:brightness-110 active:scale-95 cursor-pointer'
+                ? 'bg-[#0E253A] border border-[#20B1EE] text-white hover:bg-[#12304f] active:scale-95 cursor-pointer'
                 : 'bg-white/[0.06] text-white/30 cursor-not-allowed'
             }`}
           >

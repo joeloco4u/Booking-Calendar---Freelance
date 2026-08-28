@@ -1,23 +1,22 @@
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   Waves,
   Check,
-  X,
   ArrowRight,
   ArrowDown,
   Menu,
-  Clock,
-  Droplets,
-  Volume2,
-  UserCheck,
-  Footprints,
-  Leaf,
-  Ban,
   CalendarDays,
   Sun,
   Send,
   ChevronDown,
 } from 'lucide-react'
 import { translations, type Lang } from '../i18n'
+import poolA from '../images/IMG_5622-_1_.png'
+import poolB from '../images/IMG_5617.png'
+import poolC from '../images/IMG_5623.png'
+import poolD from '../images/IMG_8073.png'
+import poolE from '../images/d23868d7-a4d5-47c6-8e1e-3763c671d350.png'
+import poolF from '../images/IMG_5623-_1_.png'
 
 interface LandingPageProps {
   lang: Lang
@@ -25,7 +24,7 @@ interface LandingPageProps {
   onBookNow: () => void
 }
 
-const RULES_ICONS = [Clock, Droplets, Volume2, UserCheck, Footprints, Leaf, Ban]
+const INCLUDED_IMAGES = [poolA, poolB, poolC, poolD]
 const STEP_ICONS = [CalendarDays, Sun, Send]
 
 function LanguageToggle({ lang, onLangChange }: { lang: Lang; onLangChange: (l: Lang) => void }) {
@@ -37,7 +36,7 @@ function LanguageToggle({ lang, onLangChange }: { lang: Lang; onLangChange: (l: 
           onClick={() => onLangChange(code)}
           className={`px-2.5 h-7 rounded-full text-xs font-bold uppercase transition-all active:scale-95 cursor-pointer ${
             lang === code
-              ? 'bg-cyan-glow text-marine shadow-[0_0_12px_rgba(32,177,238,0.6)]'
+              ? 'bg-[#0E253A] text-cyan-glow border border-[#20B1EE]/40'
               : 'text-white/50 hover:text-white'
           }`}
         >
@@ -48,19 +47,91 @@ function LanguageToggle({ lang, onLangChange }: { lang: Lang; onLangChange: (l: 
   )
 }
 
+const NAV_SECTIONS = ['included', 'rules', 'how', 'faq'] as const
+
 function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
   const t = translations[lang]
 
-  const NavLink = ({ href, label }: { href: string; label: string }) => (
-    <a href={href} className="text-sm text-white/70 hover:text-white transition-colors">
-      {label}
-    </a>
-  )
+  const headerRef = useRef<HTMLElement | null>(null)
+  const indicatorRef = useRef<HTMLSpanElement | null>(null)
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
+  const activeRef = useRef(0)
+  const hoverRef = useRef<number | null>(null)
+
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
+
+  const navItems = [
+    { href: '#included', label: t.landing.navIncluded },
+    { href: '#rules', label: t.landing.navRules },
+    { href: '#how', label: t.landing.navHow },
+    { href: '#faq', label: t.landing.navFaq },
+  ]
+
+  const moveIndicator = useCallback(() => {
+    const headerRect = headerRef.current?.getBoundingClientRect()
+    const link = linkRefs.current[hoverRef.current ?? activeRef.current]
+    const indicator = indicatorRef.current
+    if (!headerRect || !link || !indicator) return
+    const linkRect = link.getBoundingClientRect()
+    indicator.style.left = `${linkRect.left - headerRect.left}px`
+    indicator.style.width = `${linkRect.width}px`
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          const idx = NAV_SECTIONS.indexOf(entry.target.id as (typeof NAV_SECTIONS)[number])
+          if (idx === -1) return
+          activeRef.current = idx
+          setActiveIdx(idx)
+        })
+      },
+      { rootMargin: '-80px 0px -45% 0px', threshold: 0 },
+    )
+    NAV_SECTIONS.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    const onResize = () => moveIndicator()
+    window.addEventListener('resize', onResize)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', onResize)
+    }
+  }, [moveIndicator])
+
+  useEffect(() => {
+    moveIndicator()
+  }, [moveIndicator, activeIdx, hoverIdx, lang])
+
+  const setHover = (idx: number) => {
+    hoverRef.current = idx
+    setHoverIdx(idx)
+  }
+
+  const clearHover = () => {
+    hoverRef.current = null
+    setHoverIdx(null)
+  }
+
+  const linkClass = (idx: number) => {
+    const isOn = idx === (hoverIdx ?? activeIdx)
+    return isOn
+      ? 'text-sm text-white font-semibold [text-shadow:0_0_8px_rgba(32,177,238,0.4)] transition-all cursor-pointer'
+      : 'text-sm text-white/75 font-medium hover:text-white hover:font-semibold hover:[text-shadow:0_0_8px_rgba(32,177,238,0.4)] transition-all cursor-pointer'
+  }
 
   return (
-    <header className="bg-navy-deep sticky top-0 z-40 border-b border-white/[0.06]">
-      <div className="max-w-7xl mx-auto px-5 md:px-6 h-16 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5 shrink-0">
+    <header
+      ref={headerRef}
+      className="bg-navy-deep sticky top-0 z-40 border-b border-white/[0.06] relative"
+    >
+      <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 md:px-6">
+        <div className="flex min-w-0 items-center gap-2.5">
           <img
             src="/FlatamLogo.png"
             alt="Freelance Latam Logo"
@@ -72,18 +143,30 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
           </div>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-7">
-          <NavLink href="#rules" label={t.landing.navRules} />
-          <NavLink href="#included" label={t.landing.navIncluded} />
-          <NavLink href="#how" label={t.landing.navHow} />
-          <NavLink href="#faq" label={t.landing.navFaq} />
+        <nav
+          className="hidden lg:flex items-center justify-self-center gap-7"
+          onMouseLeave={clearHover}
+        >
+          {navItems.map((item, idx) => (
+            <a
+              key={item.href}
+              ref={(el) => {
+                linkRefs.current[idx] = el
+              }}
+              href={item.href}
+              onMouseEnter={() => setHover(idx)}
+              className={linkClass(idx)}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center justify-end gap-3">
           <LanguageToggle lang={lang} onLangChange={onLangChange} />
           <button
             onClick={onBookNow}
-            className="hidden sm:inline-flex items-center gap-2 px-4 h-9 rounded-full bg-gradient-to-r from-cyan-cta to-cyan-glow text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_8px_20px_-6px_rgba(24,149,199,0.7)] cursor-pointer"
+            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#20B1EE] active:scale-95 transition-all cursor-pointer"
           >
             {t.landing.heroCta}
           </button>
@@ -96,6 +179,16 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
           </a>
         </div>
       </div>
+      <span
+        ref={indicatorRef}
+        className="hidden lg:block pointer-events-none absolute bottom-0 h-[3px] rounded-t-[3px]"
+        style={{
+          background: 'linear-gradient(90deg, #1895C7 0%, #20B1EE 100%)',
+          boxShadow: '0 0 10px rgba(32,177,238,0.8)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          width: 0,
+        }}
+      />
     </header>
   )
 }
@@ -104,33 +197,36 @@ function Hero({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
   const t = translations[lang]
 
   return (
-    <section id="top" className="relative bg-navy-deep overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-deep via-[#0e2a4d] to-navy-deep" />
-      <div
-        className="absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)',
-          backgroundSize: '64px 64px',
-        }}
-      />
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[820px] h-[480px] bg-cyan-bright/15 rounded-full blur-[120px]" />
-      <div className="absolute -bottom-24 right-[-120px] w-[520px] h-[420px] bg-cyan-glow/20 rounded-full blur-[120px]" />
+    <section id="top" className="relative bg-[#0E253A] overflow-hidden">
+      <div className="absolute inset-0">
+        <img
+          src={poolF}
+          alt=""
+          className="h-full w-full object-cover"
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(10, 25, 47, 0.85) 0%, rgba(13, 37, 63, 0.95) 100%)',
+          }}
+        />
+      </div>
 
-      <div className="relative max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
-        <h1 className="mt-6 text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.08] text-balance">
+      <div className="relative mx-auto flex min-h-[620px] w-full max-w-5xl flex-col items-center justify-center px-6 py-24 text-center md:min-h-[700px]">
+        <h1 className="mt-4 max-w-4xl text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.12] text-balance">
           {t.landing.heroTitle}{' '}
           <span className="bg-gradient-to-r from-cyan-glow to-cyan-cta bg-clip-text text-transparent">
             {t.landing.heroHighlight}
           </span>
         </h1>
-        <p className="mt-6 text-lg text-white/75 mx-auto max-w-2xl">{t.landing.heroSub}</p>
+        <p className="mt-6 max-w-2xl text-lg text-white/75 mx-auto">{t.landing.heroSub}</p>
 
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-          {t.landing.heroStats.map((stat) => (
+        <div className="mt-10 grid w-full max-w-3xl grid-cols-1 sm:grid-cols-3 gap-4 mx-auto">
+          {t.landing.heroStats.map((stat, idx) => (
             <div
-              key={stat.label}
-              className="rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur px-4 py-5"
+              key={idx}
+              className="rounded-2xl bg-white/[0.05] border border-white/10 backdrop-blur px-4 py-5 text-center"
             >
               <p className="text-2xl font-bold text-cyan-glow">{stat.value}</p>
               <p className="mt-1 text-xs text-white/60 font-medium">{stat.label}</p>
@@ -141,13 +237,13 @@ function Hero({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={onBookNow}
-            className="inline-flex items-center gap-2 px-8 h-13 py-3.5 rounded-full bg-gradient-to-r from-cyan-cta to-cyan-glow text-white text-base font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_12px_28px_-10px_rgba(60,200,255,0.7)] cursor-pointer"
+            className="inline-flex items-center gap-2 px-8 h-13 py-3.5 rounded-full bg-[#0E253A] border border-[#20B1EE] text-white text-base font-bold hover:bg-[#12304f] active:scale-95 transition-all cursor-pointer"
           >
             {t.landing.heroCta} <ArrowRight className="w-4 h-4" />
           </button>
           <a
             href="#rules"
-            className="inline-flex items-center gap-2 px-7 h-13 py-3.5 rounded-full bg-white/[0.07] border border-white/15 text-white text-base font-semibold hover:bg-white/[0.12] transition-all"
+            className="inline-flex items-center gap-2 px-7 h-13 py-3.5 rounded-full bg-white/[0.07] border border-white/20 text-white text-base font-semibold hover:border-[#20B1EE]/60 hover:bg-white/[0.12] transition-all"
           >
             {t.landing.heroSecondary} <ArrowDown className="w-4 h-4" />
           </a>
@@ -174,30 +270,106 @@ function SectionHeading({
   )
 }
 
-function Rules({ lang }: { lang: Lang }) {
-  const t = translations[lang]
+function Reveal({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: ReactNode
+  delay?: number
+  className?: string
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <section id="rules" className="bg-white py-24 scroll-mt-16">
-      <div className="max-w-7xl mx-auto px-6">
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-all duration-700 ease-out ${
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+      } ${className}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+function Rules({ lang }: { lang: Lang }) {
+  const t = translations[lang]
+  const [open, setOpen] = useState<number | null>(0)
+
+  return (
+    <section id="rules" className="bg-mist py-24 scroll-mt-16">
+      <div className="max-w-4xl mx-auto px-6">
         <SectionHeading title={t.landing.rulesTitle} subtitle={t.landing.rulesSub} />
-        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div className="mt-14 space-y-4">
           {t.facility.rules.map((rule, idx) => {
-            const Icon = RULES_ICONS[idx]
+            const isOpen = open === idx
             return (
-              <div
-                key={rule.title}
-                className="group relative bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_10px_30px_-14px_rgba(10,37,64,0.15)] hover:shadow-[0_16px_40px_-14px_rgba(24,149,199,0.35)] hover:-translate-y-1 transition-all duration-200"
-              >
-                <span className="absolute top-5 right-5 text-3xl font-black text-slate-100 group-hover:text-cyan-glow/20 transition-colors">
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <div className="w-12 h-12 rounded-2xl bg-marine text-cyan-glow flex items-center justify-center">
-                  <Icon className="w-6 h-6" />
+              <Reveal key={idx} delay={idx * 60}>
+                <div
+                  className={`group overflow-hidden rounded-[14px] transition-all duration-300 ${
+                    isOpen
+                      ? 'border-2 border-[#1895C7] bg-[#1895C7]/5 shadow-[0_10px_28px_-14px_rgba(24,149,199,0.45)] hover:-translate-y-0.5'
+                      : 'border border-[#E2E8F0]/80 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(0,0,0,0.08)]'
+                  }`}
+                >
+                  <button
+                    onClick={() => setOpen(isOpen ? null : idx)}
+                    className="flex w-full cursor-pointer items-center gap-4 md:gap-5 px-5 py-5 md:px-6 text-left"
+                    aria-expanded={isOpen}
+                  >
+                    <span
+                      className={`text-3xl md:text-4xl font-black tabular-nums leading-none transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(32,177,238,0.7)] ${
+                        isOpen ? 'text-[#20B1EE]' : 'text-[#1895C7]'
+                      }`}
+                    >
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="flex-1 text-base md:text-lg font-bold text-[#0E253A] leading-snug">
+                      {rule.title}
+                    </span>
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
+                        isOpen
+                          ? 'rotate-180 border-[#1895C7] bg-[#1895C7] text-white'
+                          : 'border-slate-200 bg-slate-100 text-[#1895C7]'
+                      }`}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </span>
+                  </button>
+                  <div
+                    className={`grid transition-all duration-300 ease-out ${
+                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-5 md:px-6 text-base font-medium text-[#334155] leading-relaxed md:pl-[4.75rem]">
+                        {rule.desc}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="mt-4 text-base font-bold text-navy leading-snug">{rule.title}</h3>
-                <p className="mt-2 text-sm text-slate-500 leading-relaxed">{rule.desc}</p>
-              </div>
+              </Reveal>
             )
           })}
         </div>
@@ -212,57 +384,39 @@ function Included({ lang }: { lang: Lang }) {
   return (
     <section id="included" className="bg-white py-24 scroll-mt-16">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-3xl bg-white border border-slate-200 p-7 shadow-[0_16px_40px_-22px_rgba(10,37,64,0.18)]">
-            <div className="flex items-center gap-3">
-              <span className="w-11 h-11 rounded-2xl bg-emerald-400/15 text-emerald-500 flex items-center justify-center shrink-0">
-                <Check className="w-5 h-5" />
-              </span>
-              <h3 className="text-lg font-bold text-navy">{t.landing.includedTitle}</h3>
-            </div>
-            <div className="mt-5 space-y-2.5">
-              {t.facility.included.map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-3 rounded-2xl bg-mist px-4 py-3 border border-slate-100"
-                >
-                  <span className="w-7 h-7 rounded-full bg-cyan-glow/15 flex items-center justify-center shrink-0">
-                    <Check className="w-3.5 h-3.5 text-[#20B1EE]" />
-                  </span>
-                  <span className="text-sm font-semibold text-navy">{item.label}</span>
-                  {item.note && (
-                    <span className="ml-auto text-[11px] font-semibold text-cyan-cta">
-                      {item.note}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+        <SectionHeading title={t.landing.includedTitle} subtitle={t.landing.includedSub} />
 
-          <div className="rounded-3xl bg-white border border-slate-200 p-7 shadow-[0_16px_40px_-22px_rgba(10,37,64,0.18)]">
-            <div className="flex items-center gap-3">
-              <span className="w-11 h-11 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
-                <X className="w-5 h-5" />
-              </span>
-              <h3 className="text-lg font-bold text-navy">{t.landing.notIncludedTitle}</h3>
-            </div>
-            <div className="mt-5 space-y-2.5">
-              {t.landing.notIncluded.map((item) => (
-                <div
-                  key={item.item}
-                  className="flex items-center gap-3 rounded-2xl bg-mist px-4 py-3 border border-slate-100"
-                >
-                  <span className="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                    <X className="w-3.5 h-3.5 text-red-400" />
+        <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {t.landing.includedCards.map((card, idx) => (
+            <Reveal key={idx} delay={idx * 90}>
+              <article className="group relative aspect-[4/3] md:aspect-[16/10] overflow-hidden rounded-[16px] bg-marine-2 shadow-[0_24px_50px_-24px_rgba(10,37,64,0.45)]">
+                <img
+                  src={INCLUDED_IMAGES[idx]}
+                  alt={`${card.title} ${card.highlight}`}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E253A]/90 via-[#0E253A]/35 to-[#20b1ee]/10" />
+                <div className="relative flex h-full flex-col justify-end p-6 md:p-8">
+                  <span className="inline-flex w-fit items-center rounded-full border border-cyan-glow/40 bg-[#0E253A]/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-cyan-glow backdrop-blur">
+                    {card.tag}
                   </span>
-                  <span className="text-sm font-semibold text-navy">{item.item}</span>
+                  <h3 className="mt-3 text-2xl md:text-3xl font-bold text-white leading-tight text-balance">
+                    {card.title} <span className="text-cyan-glow">{card.highlight}</span>
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm text-white/75 leading-relaxed">{card.desc}</p>
                 </div>
-              ))}
-              <p className="pt-2 text-xs text-slate-400">{t.landing.notIncludedNote}</p>
-            </div>
-          </div>
+              </article>
+            </Reveal>
+          ))}
         </div>
+
+        <p className="mt-8 text-center text-sm text-slate-500">
+          {t.landing.includedNotLabel}:{' '}
+          <span className="font-semibold text-slate-700">
+            {t.landing.notIncluded.map((n) => n.item).join(' · ')}
+          </span>
+        </p>
       </div>
     </section>
   )
@@ -276,39 +430,75 @@ function HowItWorks({ lang }: { lang: Lang }) {
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeading title={t.landing.howTitle} subtitle={t.landing.howSub} />
 
-        <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-5">
-          {t.landing.steps.map((step, idx) => {
-            const Icon = STEP_ICONS[idx]
-            return (
-              <div key={step.title} className="relative rounded-2xl bg-mist border border-slate-200 p-7">
-                <span className="absolute -top-4 left-7 text-3xl font-black text-cyan-glow/30">
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <div className="w-12 h-12 rounded-2xl bg-marine text-cyan-glow flex items-center justify-center">
-                  <Icon className="w-6 h-6" />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-navy">{step.title}</h3>
-                <p className="mt-2 text-sm text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
-            )
-          })}
+        <div className="relative mt-14 rounded-[20px] border border-[#f0f0f0] bg-white px-6 py-12 md:px-10 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
+          <div
+            className="pointer-events-none absolute inset-x-10 hidden md:block"
+            style={{
+              top: '31px',
+              height: '2px',
+              background: 'linear-gradient(90deg, #1895C7 0%, #20B1EE 100%)',
+            }}
+          />
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-y-14 md:gap-x-6">
+            {t.landing.steps.map((step, idx) => {
+              const Icon = STEP_ICONS[idx]
+              return (
+                <Reveal key={idx} delay={idx * 200} className="flex flex-col items-center">
+                  <div className="group flex w-full max-w-[340px] flex-col items-stretch">
+                    <div className="relative z-10 mx-auto -mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-cyan-glow/40 bg-white text-sm font-black tracking-wide text-[#20B1EE] shadow-[0_0_18px_rgba(32,177,238,0.3)]">
+                      {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <div className="flex min-h-[200px] flex-col items-center rounded-2xl border border-[#f0f0f0] bg-white px-6 pt-10 pb-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#20B1EE] hover:shadow-[0_18px_40px_-12px_rgba(24,149,199,0.25)]">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1895C7]/15 text-[#20B1EE]">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h3 className="mt-4 text-base font-bold text-navy">{step.title}</h3>
+                      <p className="mt-2 text-sm text-slate-600 leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              )
+            })}
+          </div>
         </div>
 
-        <div className="mt-12 rounded-3xl bg-marine border border-white/10 p-6 md:p-8">
-          <h3 className="text-lg font-bold text-white">{t.landing.scheduleTitle}</h3>
-          <div className="mt-5 space-y-3">
-            {t.landing.schedule.map((row) => (
-              <div
-                key={row.day}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-2xl bg-white/[0.05] border border-white/10 px-5 py-4"
-              >
-                <div>
-                  <p className="text-sm font-bold text-white">{row.day}</p>
-                  <p className="text-xs text-cyan-glow font-medium">{row.turns}</p>
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
+          <div className="relative overflow-hidden rounded-3xl lg:col-span-3 min-h-[260px] shadow-[0_24px_50px_-24px_rgba(10,37,64,0.4)]">
+            <img
+              src={poolE}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0E253A]/85 via-[#0E253A]/20 to-transparent" />
+            <div className="relative flex h-full items-end p-6">
+              <p className="inline-flex items-center gap-2 text-sm font-bold text-white">
+                <span className="h-2 w-2 rounded-full bg-cyan-glow" />
+                {t.facility.days}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-[#f8fafc] p-6 lg:col-span-2">
+            <h3 className="flex items-center gap-2.5 text-lg font-bold text-navy">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-glow/10 text-cyan-cta">
+                <CalendarDays className="h-5 w-5" />
+              </span>
+              {t.landing.scheduleTitle}
+            </h3>
+            <div className="mt-5 space-y-3">
+              {t.landing.schedule.map((row, idx) => (
+                <div key={idx} className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-navy">{row.day}</p>
+                    <span className="rounded-full bg-cyan-glow/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-cta">
+                      {row.turns}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-xs text-slate-500 tabular-nums">{row.hours}</p>
                 </div>
-                <p className="text-sm text-white/60 font-medium tabular-nums">{row.hours}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -322,7 +512,7 @@ function Pricing({ lang }: { lang: Lang }) {
   return (
     <section className="bg-mist pb-24">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-cta to-cyan-glow p-8 md:p-12 shadow-[0_24px_60px_-20px_rgba(24,149,199,0.8)]">
+        <div className="relative overflow-hidden rounded-3xl bg-[#0E253A] border border-[#20B1EE]/20 p-8 md:p-12 shadow-[0_28px_60px_-28px_rgba(8,19,34,0.7)]">
           <div className="absolute -top-24 -right-20 w-96 h-72 bg-white/15 rounded-full blur-[100px]" />
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
@@ -330,7 +520,7 @@ function Pricing({ lang }: { lang: Lang }) {
                 {t.landing.priceTitle}
               </p>
               <div className="mt-2 flex items-end gap-2">
-                <span className="text-6xl font-black text-marine tracking-tight">
+                <span className="text-6xl font-black text-white tracking-tight">
                   {t.landing.priceValue}
                 </span>
                 <span className="text-lg font-semibold text-white/90 pb-2">
@@ -369,10 +559,10 @@ function Faq({ lang }: { lang: Lang }) {
       <div className="max-w-3xl mx-auto px-6">
         <SectionHeading title={t.landing.faqTitle} subtitle={t.landing.faqSub} />
         <div className="mt-12 space-y-3">
-          {t.landing.faq.map((entry) => (
+          {t.landing.faq.map((entry, idx) => (
             <details
-              key={entry.q}
-              className="group rounded-2xl bg-white border border-slate-200 px-5 py-4 open:border-cyan-glow/50 open:shadow-[0_12px_28px_-14px_rgba(24,149,199,0.4)] transition-all"
+              key={idx}
+              className="group rounded-2xl bg-white border border-slate-200 px-5 py-4 open:border-cyan-glow/50 open:shadow-[0_16px_32px_-18px_rgba(8,24,43,0.35)] transition-all"
             >
               <summary className="flex items-center justify-between gap-4 cursor-pointer list-none">
                 <span className="text-sm md:text-base font-bold text-navy">{entry.q}</span>
@@ -394,7 +584,7 @@ function CtaBanner({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
 
   return (
     <section className="bg-navy-deep relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-deep via-[#0e2a4d] to-navy-deep" />
+      <div className="absolute inset-0 bg-gradient-to-b from-navy-deep via-[#123049] to-navy-deep" />
       <div className="relative max-w-4xl mx-auto px-6 py-20 md:py-24 text-center">
         <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight text-balance">
           {t.landing.ctaTitle}
@@ -402,7 +592,7 @@ function CtaBanner({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
         <p className="mt-4 text-base text-white/70 mx-auto max-w-xl">{t.landing.ctaSub}</p>
         <button
           onClick={onBookNow}
-          className="mt-9 inline-flex items-center gap-2 px-9 py-4 rounded-full bg-gradient-to-r from-cyan-cta to-cyan-glow text-white text-base font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_12px_32px_-10px_rgba(60,200,255,0.8)] cursor-pointer animate-pulse-glow"
+          className="mt-9 inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#0E253A] border border-[#20B1EE] text-white text-base font-bold hover:bg-[#12304f] active:scale-95 transition-all cursor-pointer"
         >
           <Waves className="w-5 h-5" />
           {t.landing.cta} <ArrowRight className="w-4 h-4" />
@@ -427,11 +617,11 @@ function LandingFooter({ lang }: { lang: Lang }) {
           <span className="text-white font-semibold tracking-tight">Freelance Latam</span>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-6">
-          <a href="#rules" className="text-sm text-white/60 hover:text-white transition-colors">
-            {t.landing.navRules}
-          </a>
           <a href="#included" className="text-sm text-white/60 hover:text-white transition-colors">
             {t.landing.navIncluded}
+          </a>
+          <a href="#rules" className="text-sm text-white/60 hover:text-white transition-colors">
+            {t.landing.navRules}
           </a>
           <a href="#how" className="text-sm text-white/60 hover:text-white transition-colors">
             {t.landing.navHow}
@@ -454,8 +644,8 @@ export default function LandingPage({ lang, onLangChange, onBookNow }: LandingPa
       <LandingHeader lang={lang} onLangChange={onLangChange} onBookNow={onBookNow} />
       <main>
         <Hero lang={lang} onBookNow={onBookNow} />
-        <Rules lang={lang} />
         <Included lang={lang} />
+        <Rules lang={lang} />
         <HowItWorks lang={lang} />
         <Pricing lang={lang} />
         <Faq lang={lang} />

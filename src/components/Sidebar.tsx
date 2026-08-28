@@ -30,7 +30,7 @@ export default function Sidebar({ activeView, onNavigate, role }: SidebarProps) 
         <img
           src="/FlatamLogo.png"
           alt="Freelance Latam Logo"
-          className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-white/20 shadow-[0_0_12px_rgba(71,207,255,0.35)]"
+          className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-white/20"
         />
         {!collapsed && (
           <span className="text-[15px] font-semibold tracking-tight text-white truncate">
@@ -49,7 +49,7 @@ export default function Sidebar({ activeView, onNavigate, role }: SidebarProps) 
               onClick={() => onNavigate(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-brand-accent text-white shadow-[0_0_18px_rgba(71,207,255,0.45)] ring-1 ring-white/20'
+                  ? 'bg-[#1895C7] text-white ring-1 ring-white/20'
                   : 'text-brand-muted hover:bg-white/[0.06] hover:text-white'
               }`}
               title={collapsed ? item.label : undefined}

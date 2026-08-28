@@ -111,7 +111,7 @@ export default function Calendar({
 
   const dayClass = (day: number, status: 'occupied' | 'partial' | 'available' | null) => {
     if (isSelected(day)) {
-      return 'bg-gradient-to-r from-cyan-cta to-cyan-glow text-white shadow-[0_8px_20px_-6px_rgba(32,177,238,0.8)] ring-1 ring-white/30'
+      return 'bg-[#0E253A] text-white ring-1 ring-[#20B1EE] border border-[#20B1EE]'
     }
     if (isToday(day)) {
       return 'text-cyan-glow ring-1 ring-cyan-glow/60 font-bold'
@@ -128,11 +128,11 @@ export default function Calendar({
     if (status === 'partial') {
       return 'text-cyan-glow/80'
     }
-    return 'text-white hover:scale-110 hover:ring-2 hover:ring-cyan-glow hover:bg-cyan-glow/20 hover:shadow-[0_0_18px_rgba(32,177,238,0.6)] hover:text-white transition-all duration-200'
+    return 'text-white hover:scale-110 hover:ring-2 hover:ring-cyan-glow hover:bg-cyan-glow/20 hover:text-white transition-all duration-200'
   }
 
   const dotClass = (status: 'occupied' | 'partial' | 'available' | null) => {
-    if (status === 'available') return 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]'
+    if (status === 'available') return 'bg-emerald-400'
     if (status === 'occupied') return 'bg-red-400'
     if (status === 'partial') return 'bg-amber-400'
     return ''
@@ -230,7 +230,7 @@ export default function Calendar({
           <span className="w-2 h-2 rounded-full bg-red-400" /> {t.calendar.legendOccupied}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] text-white/50">
-          <span className="w-2 h-2 rounded-full bg-cyan-glow shadow-[0_0_6px_rgba(32,177,238,0.8)]" />{' '}
+          <span className="w-2 h-2 rounded-full bg-cyan-glow" />{' '}
           {t.calendar.legendSelected}
         </div>
       </div>
@@ -260,7 +260,7 @@ export default function Calendar({
                   onClick={() => onScheduleChange(opt.value)}
                   className={`group flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 cursor-pointer ${
                     active
-                      ? 'bg-gradient-to-r from-cyan-cta to-cyan-glow border-transparent shadow-[0_10px_24px_-8px_rgba(32,177,238,0.8)]'
+                      ? 'bg-[#0E253A] border-[#20B1EE] ring-1 ring-[#20B1EE]/50'
                       : 'bg-white/[0.05] border-white/10 hover:border-cyan-glow/60 hover:bg-cyan-glow/10 hover:scale-[1.02] active:scale-95'
                   }`}
                 >

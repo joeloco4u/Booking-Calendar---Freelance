@@ -24,7 +24,7 @@ export default function Header({
   const t = translations[lang]
 
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-6 bg-marine border-b border-white/10 shrink-0">
+    <header className="h-16 grid grid-cols-[1fr_auto] items-center px-4 md:px-6 bg-marine border-b border-white/10 shrink-0">
       <div className="flex items-center gap-2.5 min-w-0">
         <img
           src="/FlatamLogo.png"
@@ -41,11 +41,11 @@ export default function Header({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center justify-end gap-2 md:gap-3">
         {!isAdmin && (
           <button
             onClick={onBookNow}
-            className="hidden sm:inline-flex items-center gap-2 px-4 h-9 rounded-full bg-gradient-to-r from-cyan-cta to-cyan-glow text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all shadow-[0_8px_20px_-6px_rgba(24,149,199,0.7)] cursor-pointer"
+            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-full bg-[#0E253A] border border-[#1895C7]/50 text-white text-sm font-bold hover:border-[#20B1EE] hover:bg-[#12304f] active:scale-95 transition-all cursor-pointer"
           >
             {t.header.bookNow}
           </button>
@@ -58,7 +58,7 @@ export default function Header({
               onClick={() => onLangChange(code)}
               className={`px-2.5 h-7 rounded-full text-xs font-bold uppercase transition-all active:scale-95 cursor-pointer ${
                 lang === code
-                  ? 'bg-cyan-glow text-marine shadow-[0_0_12px_rgba(32,177,238,0.6)]'
+                  ? 'bg-[#0E253A] text-cyan-glow border border-[#20B1EE]/40'
                   : 'text-white/50 hover:text-white'
               }`}
             >
@@ -78,7 +78,7 @@ export default function Header({
           </span>
         </button>
 
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-gradient-to-tr from-cyan-cta to-cyan-glow ring-1 ring-white/20">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-cyan-glow text-xs font-bold shrink-0 bg-[#0E253A] border border-[#20B1EE]/50">
           {isAdmin ? 'AD' : 'FL'}
         </div>
       </div>
