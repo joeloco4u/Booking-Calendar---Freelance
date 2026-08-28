@@ -146,6 +146,15 @@ function doPost(e) {
     } else if (action === 'reject') {
       sheet.getRange(row, 1, 1, 6).setBackground('#f4cccc');
       return jsonResponse(e, { success: true, message: 'Rejected' });
+      
+    } else if (action === 'cancel' || action === 'clear') {
+      if (!row) return jsonResponse(e, { success: false, error: 'Missing required field: row' });
+      sheet.getRange(row, 1).setValue(''); // Clear name
+      sheet.getRange(row, 3).setValue(''); // Clear fee
+      sheet.getRange(row, 5).setValue(''); // Clear note
+      sheet.getRange(row, 6).setValue(false); // Uncheck conciliado
+      sheet.getRange(row, 1, 1, 6).setBackground(null); // Reset color
+      return jsonResponse(e, { success: true, message: 'Booking cancelled and slot cleared' });
     }
 
     return jsonResponse(e, { success: false, error: 'Unknown action' });

@@ -1,4 +1,4 @@
-export const GAS_URL = 'https://script.google.com/macros/s/AKfycbxu9UZSWaJ0g1fSXZ12-Ip427mmk6-S-Ws-Ox_meoSd_jgk6aVSghbSUOj3L4zzsLz8Ug/exec'
+export const GAS_URL = 'https://script.google.com/macros/s/AKfycbwIm37XE1us1PoEKFh_sj5bkbeyLdKv6zzeBJrOxep2zAboYeePqfW-uRE38jvDVx4IpQ/exec'
 
 export interface MonthDataRow {
   rowIndex: number
@@ -59,6 +59,18 @@ export async function rejectBooking(
   const res = await fetch(GAS_URL, {
     method: 'POST',
     body: JSON.stringify({ action: 'reject', row, mes }),
+  })
+  if (!res.ok) throw new Error(`POST failed: ${res.status}`)
+  return res.json()
+}
+
+export async function cancelBooking(
+  row: number,
+  mes: string
+): Promise<{ success: boolean; message: string }> {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'cancel', row, mes }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()

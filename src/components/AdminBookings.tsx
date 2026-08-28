@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Check, X, ChevronRight, Calendar } from 'lucide-react'
-import { approveBooking, rejectBooking } from '../services/api'
+import { Check, X, Trash2, Calendar } from 'lucide-react'
+import { approveBooking, rejectBooking, cancelBooking } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { formatDisplayDate } from '../utils/date'
 import { translations, type Lang } from '../i18n'
@@ -100,6 +100,17 @@ export default function AdminBookings({
       setActionLoading(null)
       setRejectTarget(null)
     }
+  }
+
+  const handleCancel = (row: MonthDataRow) => {
+    if (!window.confirm(t.admin.cancelConfirm)) return
+    setDetailTarget(null)
+    setActionLoading(row.rowIndex)
+    onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== row.rowIndex))
+    cancelBooking(row.rowIndex, currentMonthStr)
+      .then(onRefresh)
+      .catch(onRefresh)
+      .finally(() => setActionLoading(null))
   }
 
   const statusLabel = (status: string) => {
@@ -303,10 +314,20 @@ export default function AdminBookings({
                         </button>
                       </>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#94A3B8] group-hover:text-white transition-colors">
-                        {t.admin.viewDetail}
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
+                      <button
+                        onClick={() => handleCancel(row)}
+                        disabled={actionLoading === row.rowIndex}
+                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[rgba(239,68,68,0.1)] text-[#FCA5A5] border border-[rgba(239,68,68,0.2)] text-xs font-semibold whitespace-nowrap hover:bg-[rgba(239,68,68,0.18)] active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {actionLoading === row.rowIndex ? (
+                          '...'
+                        ) : (
+                          <>
+                            <Trash2 className="w-3.5 h-3.5" />
+                            {t.admin.actionCancel}
+                          </>
+                        )}
+                      </button>
                     )}
                   </div>
                 </div>
