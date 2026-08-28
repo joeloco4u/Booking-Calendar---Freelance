@@ -164,8 +164,6 @@ export default function App() {
                   onSelectDate={handleSelectDate}
                   monthData={monthData}
                   isLoading={isLoading}
-                  schedule={schedule}
-                  onScheduleChange={setSchedule}
                   lang={lang}
                 />
                 <ReservationForm

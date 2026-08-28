@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
-import { ChevronLeft, ChevronRight, CalendarClock } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { MonthDataRow } from '../services/api'
 import { extractDay } from '../utils/date'
-import { getDayType, getAvailableSchedules } from '../utils/schedule'
 import { translations, type Lang } from '../i18n'
 
 interface CalendarProps {
@@ -15,8 +14,6 @@ interface CalendarProps {
   onSelectDate: (day: number, month: number, year: number) => void
   monthData: MonthDataRow[]
   isLoading?: boolean
-  schedule: string
-  onScheduleChange: (value: string) => void
   lang: Lang
 }
 
@@ -30,8 +27,6 @@ export default function Calendar({
   onSelectDate,
   monthData,
   isLoading = false,
-  schedule,
-  onScheduleChange,
   lang,
 }: CalendarProps) {
   const t = translations[lang]
@@ -111,42 +106,32 @@ export default function Calendar({
 
   const dayClass = (day: number, status: 'occupied' | 'partial' | 'available' | null) => {
     if (isSelected(day)) {
-      return 'bg-[#0E253A] text-white ring-1 ring-[#20B1EE] border border-[#20B1EE]'
+      return 'bg-[#1895C7] text-white font-bold ring-1 ring-white/25 shadow-[0_10px_24px_-12px_rgba(24,149,199,0.55)]'
     }
     if (isToday(day)) {
-      return 'text-cyan-glow ring-1 ring-cyan-glow/60 font-bold'
+      return 'text-[#60A5FA] ring-1 ring-[#1895C7]/40 font-bold'
     }
     if (isPast(day)) {
-      return 'text-white/[0.22] cursor-not-allowed'
+      return 'text-white/[0.4] cursor-not-allowed'
     }
     if (isWeekday(day)) {
-      return 'text-white/[0.28] line-through cursor-not-allowed'
+      return 'text-white/[0.4] line-through cursor-not-allowed'
     }
     if (status === 'occupied') {
-      return 'text-white/45'
+      return 'text-white/45 font-medium'
     }
-    if (status === 'partial') {
-      return 'text-cyan-glow/80'
-    }
-    return 'text-white hover:scale-110 hover:ring-2 hover:ring-cyan-glow hover:bg-cyan-glow/20 hover:text-white transition-all duration-200'
+    return 'text-white/[0.85] font-medium hover:scale-110 hover:ring-2 hover:ring-white/30 hover:bg-white/[0.06] transition-all duration-200'
   }
 
   const dotClass = (status: 'occupied' | 'partial' | 'available' | null) => {
-    if (status === 'available') return 'bg-emerald-400'
+    if (status === 'available') return 'bg-[#10B981]'
     if (status === 'occupied') return 'bg-red-400'
     if (status === 'partial') return 'bg-amber-400'
     return ''
   }
 
-  const selectedInView =
-    selectedDate !== null && selectedMonth === currentMonth && selectedYear === currentYear
-  const selectedDayType = selectedInView ? getDayType(selectedDate, currentMonth, currentYear) : null
-  const showSchedules =
-    selectedDayType === 'friday' || selectedDayType === 'saturday' || selectedDayType === 'sunday'
-  const availableSchedules = showSchedules ? getAvailableSchedules(selectedDayType) : []
-
   return (
-    <div className="rounded-[20px] bg-marine-2 border border-white/10 p-5 md:p-6 shadow-[0_20px_50px_-24px_rgba(2,8,20,0.9)] h-full flex flex-col">
+    <div className="flex h-full flex-col rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] p-5 md:p-6 backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between mb-5">
         <button
           onClick={onPrevMonth}
@@ -170,7 +155,7 @@ export default function Calendar({
         {t.calendar.weekdays.map((day) => (
           <div
             key={day}
-            className="text-center text-[11px] font-bold uppercase tracking-wider text-white/35 py-2"
+            className="text-center text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] py-2"
           >
             {day}
           </div>
@@ -219,74 +204,17 @@ export default function Calendar({
         })}
       </div>
 
-      <div className="flex items-center gap-3 mt-5 pt-4 border-t border-white/10 flex-wrap">
-        <div className="flex items-center gap-1.5 text-[11px] text-white/50">
-          <span className="w-2 h-2 rounded-full bg-emerald-400" /> {t.calendar.legendAvailable}
-        </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+      <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-2 flex-wrap">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/70">
+          <span className="w-2 h-2 rounded-full bg-[#10B981]" /> {t.calendar.legendAvailable}
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/70">
           <span className="w-2 h-2 rounded-full bg-amber-400" /> {t.calendar.legendPartial}
-        </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-white/50">
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/70">
           <span className="w-2 h-2 rounded-full bg-red-400" /> {t.calendar.legendOccupied}
-        </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-white/50">
-          <span className="w-2 h-2 rounded-full bg-cyan-glow" />{' '}
-          {t.calendar.legendSelected}
-        </div>
+        </span>
       </div>
-
-      {showSchedules && (
-        <div className="mt-5 pt-4 border-t border-white/10 animate-slide-in">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan-glow/10 flex items-center justify-center shrink-0">
-              <CalendarClock className="w-4 h-4 text-cyan-glow" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white">{t.booking.schedulesLabel}</p>
-              <p className="text-[11px] text-white/50">
-                {selectedDayType === 'friday' && t.booking.dayHintFriday}
-                {selectedDayType === 'saturday' && t.booking.dayHintSaturday}
-                {selectedDayType === 'sunday' && t.booking.dayHintSunday}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {availableSchedules.map((opt) => {
-              const active = schedule === opt.value
-              return (
-                <button
-                  key={opt.value}
-                  onClick={() => onScheduleChange(opt.value)}
-                  className={`group flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                    active
-                      ? 'bg-[#0E253A] border-[#20B1EE] ring-1 ring-[#20B1EE]/50'
-                      : 'bg-white/[0.05] border-white/10 hover:border-cyan-glow/60 hover:bg-cyan-glow/10 hover:scale-[1.02] active:scale-95'
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${opt.dot} shrink-0`} />
-                  <span className="text-left">
-                    <span
-                      className={`block text-sm font-bold ${
-                        active ? 'text-white' : 'text-white'
-                      }`}
-                    >
-                      {opt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight}
-                    </span>
-                    <span
-                      className={`block text-xs ${
-                        active ? 'text-white/85' : 'text-white/50'
-                      }`}
-                    >
-                      {opt.hours}
-                    </span>
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

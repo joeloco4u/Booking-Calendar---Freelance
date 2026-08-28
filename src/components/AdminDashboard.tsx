@@ -144,7 +144,7 @@ export default function AdminDashboard({
           />
           <button
             type="submit"
-            className="w-full bg-[#0E253A] border border-[#1895C7]/50 hover:border-[#20B1EE] hover:bg-[#12304f] active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer"
+            className="w-full bg-[#1895C7] hover:bg-[#1279AE] active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer"
           >
             {t.admin.unlock}
           </button>
@@ -296,7 +296,7 @@ export default function AdminDashboard({
                   className={`${gridCols} group px-4 py-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:border-cyan-glow/40 hover:bg-white/[0.07] hover:scale-[1.005] transition-all duration-200 cursor-pointer`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-[#0E253A] border border-[#20B1EE]/40 flex items-center justify-center text-xs font-bold text-cyan-glow shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#0E2138] border border-[#1895C7]/40 flex items-center justify-center text-xs font-bold text-cyan-glow shrink-0">
                       {row.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                     </div>
                     <span className="text-sm font-semibold text-white truncate">{row.name}</span>
@@ -372,7 +372,7 @@ export default function AdminDashboard({
             </div>
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#0E253A] border border-[#20B1EE]/40 flex items-center justify-center text-sm font-bold text-cyan-glow">
+                <div className="w-12 h-12 rounded-2xl bg-[#0E2138] border border-[#1895C7]/40 flex items-center justify-center text-sm font-bold text-cyan-glow">
                   {detailTarget.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div>

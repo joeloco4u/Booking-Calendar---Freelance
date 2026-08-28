@@ -45,20 +45,20 @@ export default function Header({
         {!isAdmin && (
           <button
             onClick={onBookNow}
-            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-full bg-[#0E253A] border border-[#1895C7]/50 text-white text-sm font-bold hover:border-[#20B1EE] hover:bg-[#12304f] active:scale-95 transition-all cursor-pointer"
+            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#1279AE] active:scale-95 transition-all cursor-pointer"
           >
             {t.header.bookNow}
           </button>
         )}
 
-        <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10">
+        <div className="flex items-center p-1 rounded-full bg-white/[0.08] border border-white/15">
           {(['es', 'en'] as const).map((code) => (
             <button
               key={code}
               onClick={() => onLangChange(code)}
               className={`px-2.5 h-7 rounded-full text-xs font-bold uppercase transition-all active:scale-95 cursor-pointer ${
                 lang === code
-                  ? 'bg-[#0E253A] text-cyan-glow border border-[#20B1EE]/40'
+                  ? 'bg-[#0E2138] text-cyan-glow border border-[#1895C7]/40'
                   : 'text-white/50 hover:text-white'
               }`}
             >
@@ -69,7 +69,7 @@ export default function Header({
 
         <button
           onClick={() => onRoleChange(isAdmin ? 'freelancer' : 'admin')}
-          className="flex items-center gap-2 px-3 h-9 rounded-full bg-white/[0.06] border border-white/10 text-sm text-white/80 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-3 h-9 rounded-full bg-white/[0.08] border border-white/15 text-sm text-white/90 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer"
           title="Cambiar rol (demo)"
         >
           {isAdmin ? <Shield className="w-4 h-4 text-cyan-glow" /> : <User className="w-4 h-4 text-white/60" />}
@@ -78,7 +78,7 @@ export default function Header({
           </span>
         </button>
 
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-cyan-glow text-xs font-bold shrink-0 bg-[#0E253A] border border-[#20B1EE]/50">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-cyan-glow text-xs font-bold shrink-0 bg-[#0E2138] border border-[#1895C7]/50">
           {isAdmin ? 'AD' : 'FL'}
         </div>
       </div>

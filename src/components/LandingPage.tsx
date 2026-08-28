@@ -36,7 +36,7 @@ function LanguageToggle({ lang, onLangChange }: { lang: Lang; onLangChange: (l: 
           onClick={() => onLangChange(code)}
           className={`px-2.5 h-7 rounded-full text-xs font-bold uppercase transition-all active:scale-95 cursor-pointer ${
             lang === code
-              ? 'bg-[#0E253A] text-cyan-glow border border-[#20B1EE]/40'
+              ? 'bg-[#0E2138] text-cyan-glow border border-[#1895C7]/40'
               : 'text-white/50 hover:text-white'
           }`}
         >
@@ -121,8 +121,8 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
   const linkClass = (idx: number) => {
     const isOn = idx === (hoverIdx ?? activeIdx)
     return isOn
-      ? 'text-sm text-white font-semibold [text-shadow:0_0_8px_rgba(32,177,238,0.4)] transition-all cursor-pointer'
-      : 'text-sm text-white/75 font-medium hover:text-white hover:font-semibold hover:[text-shadow:0_0_8px_rgba(32,177,238,0.4)] transition-all cursor-pointer'
+      ? 'text-sm text-white font-semibold transition-all cursor-pointer'
+      : 'text-sm text-white/70 font-medium hover:text-white hover:font-semibold transition-all cursor-pointer'
   }
 
   return (
@@ -166,7 +166,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
           <LanguageToggle lang={lang} onLangChange={onLangChange} />
           <button
             onClick={onBookNow}
-            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#20B1EE] active:scale-95 transition-all cursor-pointer"
+            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#1279AE] active:scale-95 transition-all cursor-pointer"
           >
             {t.landing.heroCta}
           </button>
@@ -181,10 +181,9 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
       </div>
       <span
         ref={indicatorRef}
-        className="hidden lg:block pointer-events-none absolute bottom-0 h-[3px] rounded-t-[3px]"
+        className="hidden lg:block pointer-events-none absolute bottom-0 h-[2px] rounded-t-[2px]"
         style={{
-          background: 'linear-gradient(90deg, #1895C7 0%, #20B1EE 100%)',
-          boxShadow: '0 0 10px rgba(32,177,238,0.8)',
+          background: '#1895C7',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           width: 0,
         }}
@@ -197,7 +196,7 @@ function Hero({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
   const t = translations[lang]
 
   return (
-    <section id="top" className="relative bg-[#0E253A] overflow-hidden">
+    <section id="top" className="relative bg-[#0E2138] overflow-hidden">
       <div className="absolute inset-0">
         <img
           src={poolF}
@@ -237,13 +236,13 @@ function Hero({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={onBookNow}
-            className="inline-flex items-center gap-2 px-8 h-13 py-3.5 rounded-full bg-[#0E253A] border border-[#20B1EE] text-white text-base font-bold hover:bg-[#12304f] active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-8 h-13 py-3.5 rounded-full bg-[#0E2138] border border-[#1895C7] text-white text-base font-bold hover:bg-[#142A44] active:scale-95 transition-all cursor-pointer"
           >
             {t.landing.heroCta} <ArrowRight className="w-4 h-4" />
           </button>
           <a
             href="#rules"
-            className="inline-flex items-center gap-2 px-7 h-13 py-3.5 rounded-full bg-white/[0.07] border border-white/20 text-white text-base font-semibold hover:border-[#20B1EE]/60 hover:bg-white/[0.12] transition-all"
+            className="inline-flex items-center gap-2 px-7 h-13 py-3.5 rounded-full bg-white/[0.07] border border-white/20 text-white text-base font-semibold hover:border-[#1895C7]/60 hover:bg-white/[0.12] transition-all"
           >
             {t.landing.heroSecondary} <ArrowDown className="w-4 h-4" />
           </a>
@@ -328,7 +327,7 @@ function Rules({ lang }: { lang: Lang }) {
                 <div
                   className={`group overflow-hidden rounded-[14px] transition-all duration-300 ${
                     isOpen
-                      ? 'border-2 border-[#1895C7] bg-[#1895C7]/5 shadow-[0_10px_28px_-14px_rgba(24,149,199,0.45)] hover:-translate-y-0.5'
+                      ? 'border-2 border-[#1895C7] bg-[#1895C7]/5 shadow-[0_10px_28px_-14px_rgba(10,25,47,0.45)] hover:-translate-y-0.5'
                       : 'border border-[#E2E8F0]/80 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(0,0,0,0.08)]'
                   }`}
                 >
@@ -338,13 +337,13 @@ function Rules({ lang }: { lang: Lang }) {
                     aria-expanded={isOpen}
                   >
                     <span
-                      className={`text-3xl md:text-4xl font-black tabular-nums leading-none transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(32,177,238,0.7)] ${
-                        isOpen ? 'text-[#20B1EE]' : 'text-[#1895C7]'
+                      className={`text-3xl md:text-4xl font-black tabular-nums leading-none transition-all duration-300 ${
+                        isOpen ? 'text-[#1895C7]' : 'text-[#1895C7]'
                       }`}
                     >
                       {String(idx + 1).padStart(2, '0')}
                     </span>
-                    <span className="flex-1 text-base md:text-lg font-bold text-[#0E253A] leading-snug">
+                    <span className="flex-1 text-base md:text-lg font-bold text-[#0E2138] leading-snug">
                       {rule.title}
                     </span>
                     <span
@@ -396,9 +395,9 @@ function Included({ lang }: { lang: Lang }) {
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0E253A]/90 via-[#0E253A]/35 to-[#20b1ee]/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E2138]/90 via-[#0E2138]/35 to-[#1895C7]/10" />
                 <div className="relative flex h-full flex-col justify-end p-6 md:p-8">
-                  <span className="inline-flex w-fit items-center rounded-full border border-cyan-glow/40 bg-[#0E253A]/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-cyan-glow backdrop-blur">
+                  <span className="inline-flex w-fit items-center rounded-full border border-cyan-glow/40 bg-[#0E2138]/60 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-cyan-glow backdrop-blur">
                     {card.tag}
                   </span>
                   <h3 className="mt-3 text-2xl md:text-3xl font-bold text-white leading-tight text-balance">
@@ -436,7 +435,7 @@ function HowItWorks({ lang }: { lang: Lang }) {
             style={{
               top: '31px',
               height: '2px',
-              background: 'linear-gradient(90deg, #1895C7 0%, #20B1EE 100%)',
+              background: 'linear-gradient(90deg, #1895C7 0%, #1279AE 100%)',
             }}
           />
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-y-14 md:gap-x-6">
@@ -445,11 +444,11 @@ function HowItWorks({ lang }: { lang: Lang }) {
               return (
                 <Reveal key={idx} delay={idx * 200} className="flex flex-col items-center">
                   <div className="group flex w-full max-w-[340px] flex-col items-stretch">
-                    <div className="relative z-10 mx-auto -mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-cyan-glow/40 bg-white text-sm font-black tracking-wide text-[#20B1EE] shadow-[0_0_18px_rgba(32,177,238,0.3)]">
+                    <div className="relative z-10 mx-auto -mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-cyan-glow/40 bg-white text-sm font-black tracking-wide text-[#1895C7] shadow-[0_8px_20px_rgba(10,25,47,0.12)]">
                       {String(idx + 1).padStart(2, '0')}
                     </div>
-                    <div className="flex min-h-[200px] flex-col items-center rounded-2xl border border-[#f0f0f0] bg-white px-6 pt-10 pb-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#20B1EE] hover:shadow-[0_18px_40px_-12px_rgba(24,149,199,0.25)]">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1895C7]/15 text-[#20B1EE]">
+                    <div className="flex min-h-[200px] flex-col items-center rounded-2xl border border-[#f0f0f0] bg-white px-6 pt-10 pb-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#1895C7] hover:shadow-[0_18px_40px_-12px_rgba(10,25,47,0.2)]">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1895C7]/15 text-[#1895C7]">
                         <Icon className="h-6 w-6" />
                       </div>
                       <h3 className="mt-4 text-base font-bold text-navy">{step.title}</h3>
@@ -470,7 +469,7 @@ function HowItWorks({ lang }: { lang: Lang }) {
               className="absolute inset-0 h-full w-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0E253A]/85 via-[#0E253A]/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0E2138]/85 via-[#0E2138]/20 to-transparent" />
             <div className="relative flex h-full items-end p-6">
               <p className="inline-flex items-center gap-2 text-sm font-bold text-white">
                 <span className="h-2 w-2 rounded-full bg-cyan-glow" />
@@ -512,7 +511,7 @@ function Pricing({ lang }: { lang: Lang }) {
   return (
     <section className="bg-mist pb-24">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-[#0E253A] border border-[#20B1EE]/20 p-8 md:p-12 shadow-[0_28px_60px_-28px_rgba(8,19,34,0.7)]">
+        <div className="relative overflow-hidden rounded-3xl bg-[#0E2138] border border-[#1895C7]/20 p-8 md:p-12 shadow-[0_28px_60px_-28px_rgba(8,19,34,0.7)]">
           <div className="absolute -top-24 -right-20 w-96 h-72 bg-white/15 rounded-full blur-[100px]" />
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
@@ -592,7 +591,7 @@ function CtaBanner({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
         <p className="mt-4 text-base text-white/70 mx-auto max-w-xl">{t.landing.ctaSub}</p>
         <button
           onClick={onBookNow}
-          className="mt-9 inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#0E253A] border border-[#20B1EE] text-white text-base font-bold hover:bg-[#12304f] active:scale-95 transition-all cursor-pointer"
+          className="mt-9 inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#0E2138] border border-[#1895C7] text-white text-base font-bold hover:bg-[#142A44] active:scale-95 transition-all cursor-pointer"
         >
           <Waves className="w-5 h-5" />
           {t.landing.cta} <ArrowRight className="w-4 h-4" />

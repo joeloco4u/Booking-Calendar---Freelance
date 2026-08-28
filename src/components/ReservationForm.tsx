@@ -1,18 +1,21 @@
 import { useState, useMemo, useEffect } from 'react'
 import {
   Send,
+  Check,
   CheckCircle,
   AlertCircle,
   Loader2,
   CalendarCheck,
   ChevronRight,
   Clock,
-  Wallet,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react'
 import { submitBooking } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { getDayType, getAvailableSchedules } from '../utils/schedule'
 import { translations, type Lang } from '../i18n'
+import poolThumb from '../images/IMG_5622-_1_.png'
 
 interface ReservationFormProps {
   selectedDate: number | null
@@ -40,34 +43,53 @@ function formatDisplayDate(day: number, month: number, year: number, lang: Lang)
   })
 }
 
-function useCountUp(target: number, active: boolean, duration = 800) {
-  const [value, setValue] = useState(0)
-
-  useEffect(() => {
-    if (!active) {
-      setValue(0)
-      return
-    }
-    let raf = 0
-    const start = performance.now()
-    const step = (now: number) => {
-      const t = Math.min((now - start) / duration, 1)
-      const eased = 1 - Math.pow(1 - t, 3)
-      setValue(Math.round(target * eased))
-      if (t < 1) raf = requestAnimationFrame(step)
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [target, active, duration])
-
-  return value
-}
-
 const floatingInput =
-  'peer w-full h-12 px-3.5 pt-4 pb-1 rounded-xl bg-white/[0.06] border border-white/15 text-sm text-white placeholder:text-white/30 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-glow/70 focus:border-transparent'
+  'peer w-full h-12 px-3.5 pt-4 pb-1 rounded-xl bg-white/[0.06] border border-white/15 text-sm text-white placeholder:text-white/30 transition-all focus:outline-none focus:ring-2 focus:ring-[#1895C7]/60 focus:border-transparent'
 
 const floatingLabel =
-  'absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-white/45 transition-all duration-200 pointer-events-none peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-cyan-glow peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[11px] peer-[:not(:placeholder-shown)]:text-white/60'
+  'absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-white/45 transition-all duration-200 pointer-events-none peer-focus:top-2 peer-focus:text-[11px] peer-focus:text-[#1895C7] peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[11px] peer-[:not(:placeholder-shown)]:text-white/60'
+
+function PreviewCard({ lang, weekday = false }: { lang: Lang; weekday?: boolean }) {
+  const t = translations[lang]
+  return (
+    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)] animate-fade-in-up">
+      <div className="relative h-44 shrink-0 overflow-hidden">
+        <img
+          src={poolThumb}
+          alt="Pool"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/55 to-[#0F172A]/10" />
+        <span className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur px-3 py-1 text-[11px] font-semibold text-white/90">
+          <CalendarCheck className="w-3.5 h-3.5 text-[#60A5FA]" />
+          {t.facility.heroBadge}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col justify-center gap-4 p-6">
+        <div>
+          <h3 className="text-lg md:text-xl font-bold text-white">
+            {weekday ? t.booking.weekdayTitle : t.booking.emptyTitle}
+          </h3>
+          <p className="mt-1.5 text-sm text-white/60 leading-relaxed">
+            {weekday ? t.booking.weekdaySub : t.booking.emptySub}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {t.booking.equipBadges.map((badge) => (
+            <span
+              key={badge}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.06] border border-white/10 px-2.5 py-1.5 text-xs font-medium text-white/85"
+            >
+              <Check className="w-3.5 h-3.5 text-[#10B981]" />
+              {badge}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ReservationForm({
   selectedDate,
@@ -82,11 +104,14 @@ export default function ReservationForm({
 }: ReservationFormProps) {
   const t = translations[lang]
   const [fullName, setFullName] = useState('')
-  const [contact, setContact] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [extras, setExtras] = useState<string[]>([])
   const [rulesAccepted, setRulesAccepted] = useState(false)
+  const [policyAccepted, setPolicyAccepted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [step, setStep] = useState<'preview' | 'details'>('preview')
 
   const dayType = getDayType(selectedDate, selectedMonth, selectedYear)
   const isWeekdaySelected = dayType === 'weekday'
@@ -124,10 +149,21 @@ export default function ReservationForm({
     fullName.trim() !== '' &&
     rulesAccepted
 
-  const animatedTotal = useCountUp(FEE, hasDate && !isWeekdaySelected)
-
   const availableSchedules = getAvailableSchedules(dayType)
-  const selectedHours = availableSchedules.find((s) => s.value === schedule)?.hours ?? ''
+  const selectedOpt = availableSchedules.find((s) => s.value === schedule) ?? null
+  const dayHint =
+    dayType === 'friday'
+      ? t.booking.dayHintFriday
+      : dayType === 'saturday'
+        ? t.booking.dayHintSaturday
+        : dayType === 'sunday'
+          ? t.booking.dayHintSunday
+          : ''
+
+  useEffect(() => {
+    setStep('preview')
+    setPolicyAccepted(false)
+  }, [selectedDate, selectedMonth, selectedYear])
 
   const toggleExtra = (id: string) => {
     setExtras((prev) => (prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]))
@@ -147,11 +183,13 @@ export default function ReservationForm({
     })
       .then(() => {
         setFullName('')
-        setContact('')
+        setPhone('')
+        setEmail('')
         setExtras([])
         setRulesAccepted(false)
         onScheduleChange('')
         setStatus('success')
+        setStep('preview')
         if (onRefresh) onRefresh()
         setTimeout(() => setStatus('idle'), 6000)
       })
@@ -168,183 +206,281 @@ export default function ReservationForm({
     selectedDate !== null && selectedMonth !== null && selectedYear !== null
       ? formatDisplayDate(selectedDate, selectedMonth, selectedYear, lang)
       : null
+  const displayTitle = displayDate
+    ? displayDate.charAt(0).toUpperCase() + displayDate.slice(1)
+    : ''
 
   if (!hasDate || isWeekdaySelected) {
-    return (
-      <div className="rounded-[20px] bg-marine-2 border border-white/10 p-6 md:p-8 shadow-[0_20px_50px_-24px_rgba(2,8,20,0.9)] flex flex-col items-center justify-center text-center h-full min-h-[420px]">
-        <div className="w-14 h-14 rounded-2xl bg-cyan-glow/10 flex items-center justify-center">
-          <CalendarCheck className="w-7 h-7 text-cyan-glow" />
-        </div>
-        <h2 className="mt-4 text-lg font-bold text-white">{t.booking.hintTitle}</h2>
-        <p className="mt-2 text-sm text-white/60 max-w-xs">
-          {isWeekdaySelected ? t.booking.hintWeekday : t.booking.hintSelect}
-        </p>
-      </div>
-    )
+    return <PreviewCard lang={lang} weekday={isWeekdaySelected} />
   }
 
   return (
-    <div className="h-full space-y-4 animate-fade-in-up">
-      <div className="relative overflow-hidden rounded-2xl bg-[#0E253A] border border-[#20B1EE]/25 p-5 shadow-[0_20px_40px_-20px_rgba(8,19,34,0.7)]">
-        <div className="absolute -top-16 -right-10 w-52 h-40 bg-white/15 rounded-full blur-[70px]" />
-        <div className="relative flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/85">
-              {t.booking.costLabel}
-            </p>
-            <p className="mt-1 text-3xl font-black text-white tabular-nums tracking-tight">
-              ${animatedTotal.toFixed(2)}{' '}
-              <span className="text-sm font-semibold text-white/85">USD</span>
-            </p>
-            <p className="mt-1 text-xs text-white/80 font-medium">{t.booking.feeNote}</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0">
-            <Wallet className="w-6 h-6 text-white" />
-          </div>
-        </div>
-      </div>
+    <div key={displayTitle} className="h-full animate-fade-in-up">
+      {step === 'details' ? (
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={() => setStep('preview')}
+            className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white active:scale-95 transition-all w-fit cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t.booking.backToPreview}
+          </button>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="rounded-xl bg-white/[0.05] border border-white/10 p-3.5">
-          <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
-            <CalendarCheck className="w-3.5 h-3.5 text-cyan-glow" /> {t.booking.dateSelected}
-          </p>
-          <p className="mt-1.5 text-sm font-bold text-white capitalize">{displayDate ?? '—'}</p>
-        </div>
-        <div className="rounded-xl bg-white/[0.05] border border-white/10 p-3.5">
-          <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
-            <Clock className="w-3.5 h-3.5 text-cyan-glow" /> {t.booking.scheduleSelected}
-          </p>
-          <p className="mt-1.5 text-sm font-bold text-white">
-            {selectedHours ||
-              (schedule
-                ? schedule
-                : <span className="text-white/40 font-medium">{t.booking.selectTurnHint}</span>)}
-          </p>
-        </div>
-      </div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-[20px] bg-marine-2 border border-white/10 p-6 md:p-7 shadow-[0_20px_50px_-24px_rgba(2,8,20,0.9)]"
-      >
-        {status === 'success' && (
-          <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-emerald-400/15 border border-emerald-400/25 text-emerald-300 text-sm">
-            <CheckCircle className="w-4 h-4 shrink-0" />
-            {t.booking.success}
-          </div>
-        )}
-        {status === 'error' && (
-          <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-red-400/15 border border-red-400/25 text-red-300 text-sm">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {t.booking.error}
-          </div>
-        )}
-
-        <h2 className="text-lg font-bold text-white mb-5">{t.booking.formTitle}</h2>
-
-        <div className="space-y-4">
-          <div className="relative">
-            <input
-              type="text"
-              id="fullName"
-              placeholder=" "
-              autoComplete="name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className={floatingInput}
-            />
-            <label htmlFor="fullName" className={floatingLabel}>
-              {t.booking.fullName}
-            </label>
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              id="contact"
-              placeholder=" "
-              autoComplete="tel"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              className={floatingInput}
-            />
-            <label htmlFor="contact" className={floatingLabel}>
-              {t.booking.contact}
-            </label>
-          </div>
-
-          <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4">
-            <p className="text-sm font-semibold text-white">{t.booking.extrasTitle}</p>
-            <div className="mt-3 space-y-2">
-              {EXTRAS.map((extra) => {
-                const label =
-                  extra === 'parrillera'
-                    ? t.booking.extraParrillera
-                    : extra === 'domino'
-                      ? t.booking.extraDomino
-                      : t.booking.extraPingpong
-                const checked = extras.includes(extra)
-                return (
-                  <label
-                    key={extra}
-                    className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.98] border ${
-                      checked
-                        ? 'border-cyan-glow/50 bg-cyan-glow/10'
-                        : 'border-white/10 bg-white/[0.04] hover:border-white/20'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleExtra(extra)}
-                      className="w-4 h-4 accent-[#20b1ee]"
-                    />
-                    <span className={`text-sm font-medium ${checked ? 'text-cyan-glow' : 'text-white/75'}`}>
-                      {label}
-                    </span>
-                    {checked && <ChevronRight className="w-4 h-4 text-cyan-glow ml-auto" />}
-                  </label>
-                )
-              })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-xl bg-white/[0.05] border border-white/10 p-3.5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                <CalendarCheck className="w-3.5 h-3.5 text-[#1895C7]" /> {t.booking.dateSelected}
+              </p>
+              <p className="mt-1.5 text-sm font-bold text-white">{displayTitle}</p>
+            </div>
+            <div className="rounded-xl bg-white/[0.05] border border-white/10 p-3.5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                <Clock className="w-3.5 h-3.5 text-[#1895C7]" /> {t.booking.scheduleSelected}
+              </p>
+              <p className="mt-1.5 text-sm font-bold text-white">
+                {selectedOpt
+                  ? `${selectedOpt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight} · ${selectedOpt.hours}`
+                  : schedule || (
+                      <span className="text-white/40 font-medium">{t.booking.selectTurnHint}</span>
+                    )}
+              </p>
             </div>
           </div>
 
-          <label className="flex items-start gap-3 p-3 rounded-xl bg-cyan-glow/10 border border-cyan-glow/25 cursor-pointer active:scale-[0.99] transition-transform">
-            <input
-              type="checkbox"
-              checked={rulesAccepted}
-              onChange={(e) => setRulesAccepted(e.target.checked)}
-              className="w-4 h-4 accent-[#20b1ee] mt-0.5"
-            />
-            <span className="text-xs text-white/75 leading-relaxed">
-              <strong>{t.booking.rulesLabel}.</strong> {t.booking.rulesHint}
-            </span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className={`w-full h-12 flex items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all duration-200 ${
-              canSubmit
-                ? 'bg-[#0E253A] border border-[#20B1EE] text-white hover:bg-[#12304f] active:scale-95 cursor-pointer'
-                : 'bg-white/[0.06] text-white/30 cursor-not-allowed'
-            }`}
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] p-6 md:p-7 backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {t.booking.submitting}
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                {t.booking.submit}
-              </>
+            {status === 'success' && (
+              <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-emerald-400/15 border border-emerald-400/25 text-emerald-300 text-sm">
+                <CheckCircle className="w-4 h-4 shrink-0" />
+                {t.booking.success}
+              </div>
             )}
-          </button>
+            {status === 'error' && (
+              <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-red-400/15 border border-red-400/25 text-red-300 text-sm">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {t.booking.error}
+              </div>
+            )}
+
+            <h2 className="text-lg font-bold text-white mb-5">{t.booking.formTitle}</h2>
+
+            <div className="space-y-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  id="fullName"
+                  placeholder=" "
+                  autoComplete="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={floatingInput}
+                />
+                <label htmlFor="fullName" className={floatingLabel}>
+                  {t.booking.fullName}
+                </label>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="tel"
+                  id="phone"
+                  placeholder=" "
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className={floatingInput}
+                />
+                <label htmlFor="phone" className={floatingLabel}>
+                  {t.booking.phoneLabel}
+                </label>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="email"
+                  id="email"
+                  placeholder=" "
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={floatingInput}
+                />
+                <label htmlFor="email" className={floatingLabel}>
+                  {t.booking.emailLabel}
+                </label>
+              </div>
+
+              <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4">
+                <p className="text-sm font-semibold text-white">{t.booking.extrasTitle}</p>
+                <div className="mt-3 space-y-2">
+                  {EXTRAS.map((extra) => {
+                    const label =
+                      extra === 'parrillera'
+                        ? t.booking.extraParrillera
+                        : extra === 'domino'
+                          ? t.booking.extraDomino
+                          : t.booking.extraPingpong
+                    const checked = extras.includes(extra)
+                    return (
+                      <label
+                        key={extra}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.98] border ${
+                          checked
+                            ? 'border-[#1895C7]/50 bg-[#1895C7]/10'
+                            : 'border-white/10 bg-white/[0.04] hover:border-white/20'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleExtra(extra)}
+                          className="w-4 h-4 accent-[#1895C7]"
+                        />
+                        <span className={`text-sm font-medium ${checked ? 'text-white' : 'text-white/75'}`}>
+                          {label}
+                        </span>
+                        {checked && <ChevronRight className="w-4 h-4 text-[#1895C7] ml-auto" />}
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <label className="flex items-start gap-3 p-3 rounded-xl bg-[#1895C7]/10 border border-[#1895C7]/25 cursor-pointer active:scale-[0.99] transition-transform">
+                <input
+                  type="checkbox"
+                  checked={rulesAccepted}
+                  onChange={(e) => setRulesAccepted(e.target.checked)}
+                  className="w-4 h-4 accent-[#1895C7] mt-0.5"
+                />
+                <span className="text-xs text-white/75 leading-relaxed">
+                  <strong>{t.booking.rulesLabel}.</strong> {t.booking.rulesHint}
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className={`w-full h-12 flex items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all duration-200 ${
+                  canSubmit
+                    ? 'bg-[#1895C7] text-white hover:bg-[#1279AE] active:scale-[0.99] cursor-pointer'
+                    : 'bg-white/10 text-white/40 cursor-not-allowed'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {t.booking.submitting}
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    {t.booking.submit}
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      ) : (
+        <div className="flex h-full flex-col rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] p-6 md:p-7 backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#60A5FA]">
+            {t.booking.dateSelected}
+          </span>
+          <h3 className="mt-1 text-xl md:text-2xl font-bold text-white">{displayTitle}</h3>
+          <p className="mt-1 text-xs text-white/50">{dayHint}</p>
+
+          <p className="mt-6 text-sm font-bold text-white">{t.booking.selectSlotTitle}</p>
+          <div className="mt-3 grid grid-cols-1 gap-2.5">
+            {availableSchedules.map((opt) => {
+              const active = schedule === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onScheduleChange(opt.value)}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
+                    active
+                      ? 'border-[#1895C7] bg-[#1895C7]/15 ring-1 ring-[#1895C7]/30'
+                      : 'border-white/10 bg-white/[0.05] hover:border-white/15 hover:bg-white/[0.08]'
+                  }`}
+                >
+                  <span className={`w-2.5 h-2.5 rounded-full ${opt.dot} shrink-0`} />
+                  <span className="flex-1">
+                    <span className="block text-sm font-bold text-white">
+                      {opt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight}
+                    </span>
+                    <span className={`block text-xs ${active ? 'text-[#E2E8F0]' : 'text-[#E2E8F0]/75'}`}>
+                      {opt.hours}
+                    </span>
+                  </span>
+                  <span
+                    className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                      active ? 'border-[#1895C7]' : 'border-white/25'
+                    }`}
+                  >
+                    {active && <span className="w-2.5 h-2.5 rounded-full bg-[#1895C7]" />}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="mt-6 flex items-start gap-3 rounded-lg border-l-4 border-[#EAB308] bg-[rgba(234,179,8,0.08)] px-4 py-3">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#EAB308]" />
+            <div>
+              <p className="text-[0.9rem] font-semibold text-[#FEF08A]">{t.booking.policyTitle}</p>
+              <p className="mt-1 text-[0.825rem] text-white/80 leading-relaxed">{t.booking.policyBody}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-white/70">{t.booking.totalLabel}</span>
+              <span className="text-3xl font-bold text-white tabular-nums">
+                ${FEE}.00 <span className="text-xs font-semibold text-white/60">USD</span>
+              </span>
+            </div>
+            <label className="mt-4 flex items-start gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition-all duration-200 active:scale-[0.99] ${
+              policyAccepted
+                ? 'border-[#1895C7]/40 bg-[#1895C7]/10'
+                : 'border-white/10 bg-white/[0.04] hover:border-white/20'
+            }">
+              <input
+                type="checkbox"
+                checked={policyAccepted}
+                onChange={(e) => setPolicyAccepted(e.target.checked)}
+                className="peer sr-only"
+              />
+              <span
+                className={`mt-0.5 w-[18px] h-[18px] rounded-md border flex items-center justify-center shrink-0 transition-all duration-200 ${
+                  policyAccepted
+                    ? 'bg-[#1895C7] border-[#1895C7]'
+                    : 'border-white/30 bg-transparent'
+                }`}
+              >
+                {policyAccepted && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+              </span>
+              <span className="text-[0.85rem] text-[#E2E8F0] leading-snug">
+                {t.booking.policyConfirm}
+              </span>
+            </label>
+            <button
+              onClick={() => setStep('details')}
+              disabled={!hasSchedule || !policyAccepted}
+              className={`mt-4 w-full h-12 flex items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all duration-200 ${
+                hasSchedule && policyAccepted
+                  ? 'bg-[#1895C7] text-white hover:bg-[#1279AE] active:scale-[0.99] cursor-pointer'
+                  : 'bg-white/10 text-white/40 cursor-not-allowed'
+              }`}
+            >
+              {t.booking.continueBooking}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -12,7 +12,7 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
         onClick={() => onChange('landing')}
         className={`flex items-center gap-2 px-3.5 h-9 rounded-xl text-sm font-medium transition-all cursor-pointer ${
           view === 'landing'
-            ? 'bg-[#0E253A] text-cyan-glow ring-1 ring-[#20B1EE]/50'
+            ? 'bg-[#0E2138] text-cyan-glow ring-1 ring-[#1895C7]/50'
             : 'text-white/60 hover:text-white hover:bg-white/[0.06]'
         }`}
       >
@@ -23,7 +23,7 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
         onClick={() => onChange('app')}
         className={`flex items-center gap-2 px-3.5 h-9 rounded-xl text-sm font-medium transition-all cursor-pointer ${
           view === 'app'
-            ? 'bg-[#0E253A] text-cyan-glow ring-1 ring-[#20B1EE]/50'
+            ? 'bg-[#0E2138] text-cyan-glow ring-1 ring-[#1895C7]/50'
             : 'text-white/60 hover:text-white hover:bg-white/[0.06]'
         }`}
       >

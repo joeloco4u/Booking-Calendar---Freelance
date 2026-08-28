@@ -23,7 +23,7 @@ export default function Layout({
   onBookNow,
 }: LayoutProps) {
   return (
-    <div className="flex flex-col h-screen bg-[#0B192C] overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#0F172A] overflow-hidden">
       <Header
         title={headerTitle}
         subtitle={headerSubtitle}
