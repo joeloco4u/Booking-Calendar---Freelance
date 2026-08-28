@@ -22,7 +22,7 @@ export async function fetchMonthData(mes: string): Promise<MonthDataRow[]> {
 }
 
 export async function submitBooking(payload: {
-  fullName: string
+  name: string
   fee: number
   row: number
   mes: string
