@@ -229,7 +229,7 @@ export default function ReservationForm({
     const scheduleLabel = selectedOpt
       ? `${selectedOpt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight} · ${selectedOpt.hours}`
       : schedule
-    const finalNote = `Tel: ${phone.trim()} | Extras: ${extras.join(', ')}`
+    const finalNote = extras.length > 0 ? extras.join(', ') : ''
     submitBooking({
       name: fullName.trim(),
       fee: fee,
