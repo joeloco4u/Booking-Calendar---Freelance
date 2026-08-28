@@ -203,6 +203,14 @@ export default function ReservationForm({
     setPolicyAccepted(false)
   }, [selectedDate, selectedMonth, selectedYear])
 
+  const displayDate =
+    selectedDate !== null && selectedMonth !== null && selectedYear !== null
+      ? formatDisplayDate(selectedDate, selectedMonth, selectedYear, lang)
+      : null
+  const displayTitle = displayDate
+    ? displayDate.charAt(0).toUpperCase() + displayDate.slice(1)
+    : ''
+
   const toggleExtra = (id: string) => {
     setExtras((prev) => (prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]))
   }
@@ -212,12 +220,18 @@ export default function ReservationForm({
     if (!canSubmit || !matchedRow) return
 
     setIsSubmitting(true)
+    const scheduleLabel = selectedOpt
+      ? `${selectedOpt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight} · ${selectedOpt.hours}`
+      : schedule
     submitBooking({
       name: fullName.trim(),
       fee: FEE,
       row: matchedRow.rowIndex,
       mes: currentMonthStr,
       note: extras.join(', '),
+      contact: email.trim(),
+      schedule: scheduleLabel,
+      date: displayTitle,
     })
       .then(() => {
         setFullName('')
@@ -241,14 +255,6 @@ export default function ReservationForm({
         setIsSubmitting(false)
       })
   }
-
-  const displayDate =
-    selectedDate !== null && selectedMonth !== null && selectedYear !== null
-      ? formatDisplayDate(selectedDate, selectedMonth, selectedYear, lang)
-      : null
-  const displayTitle = displayDate
-    ? displayDate.charAt(0).toUpperCase() + displayDate.slice(1)
-    : ''
 
   if (!hasDate || isWeekdaySelected) {
     return <PreviewCard lang={lang} weekday={isWeekdaySelected} />
