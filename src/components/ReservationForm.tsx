@@ -28,9 +28,8 @@ interface ReservationFormProps {
   currentMonthStr: string
   onRefresh?: () => void
   lang: Lang
+  fee?: number
 }
-
-const FEE = 60
 
 const EXTRAS = ['parrillera', 'domino', 'pingpong'] as const
 
@@ -53,7 +52,7 @@ const floatingLabel =
 function PreviewCard({ lang, weekday = false }: { lang: Lang; weekday?: boolean }) {
   const t = translations[lang]
   return (
-    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)] animate-fade-in-up">
+    <div className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-[20px] bg-white/[0.05] border border-white/[0.18] backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] animate-fade-in-up">
       <div className="relative h-44 shrink-0 overflow-hidden">
         <img
           src={poolThumb}
@@ -102,6 +101,7 @@ export default function ReservationForm({
   currentMonthStr,
   onRefresh,
   lang,
+  fee = 60,
 }: ReservationFormProps) {
   const t = translations[lang]
   const [fullName, setFullName] = useState('')
@@ -192,11 +192,20 @@ export default function ReservationForm({
   }
 
   useEffect(() => {
-    if (schedule && isSlotOccupied(schedule)) {
-      onScheduleChange('')
+    if (schedule && selectedDate !== null) {
+      const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '')
+      const isOccupied = safeData.some(
+        (r) =>
+          r.schedule &&
+          extractDay(r.date) === selectedDate &&
+          normalize(r.schedule) === normalize(schedule) &&
+          r.status !== 'Available',
+      )
+      if (isOccupied) {
+        onScheduleChange('')
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schedule, safeData, selectedDate, selectedMonth, selectedYear])
+  }, [schedule, safeData, selectedDate, onScheduleChange])
 
   useEffect(() => {
     setStep('preview')
@@ -214,7 +223,7 @@ export default function ReservationForm({
     setIsSubmitting(true)
     submitBooking({
       name: fullName.trim(),
-      fee: FEE,
+      fee: fee,
       row: matchedRow.rowIndex,
       mes: currentMonthStr,
       note: extras.join(', '),
@@ -289,7 +298,7 @@ export default function ReservationForm({
 
           <form
             onSubmit={handleSubmit}
-            className="rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] p-6 md:p-7 backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
+            className="rounded-[20px] bg-white/[0.05] border border-white/[0.18] p-6 md:p-7 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
           >
             {status === 'success' && (
               <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-emerald-400/15 border border-emerald-400/25 text-emerald-300 text-sm">
@@ -375,8 +384,8 @@ export default function ReservationForm({
                         key={extra}
                         className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.98] border ${
                           checked
-                            ? 'border-[#1895C7]/50 bg-[#1895C7]/10'
-                            : 'border-white/10 bg-white/[0.04] hover:border-white/20'
+                            ? 'border-[#20B1EE]/60 bg-[#1895C7]/15'
+                            : 'border-white/20 bg-white/[0.08] hover:border-white/35'
                         }`}
                       >
                         <input
@@ -395,14 +404,14 @@ export default function ReservationForm({
                 </div>
               </div>
 
-              <label className="flex items-start gap-3 p-3 rounded-xl bg-[#1895C7]/10 border border-[#1895C7]/25 cursor-pointer active:scale-[0.99] transition-transform">
+              <label className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.08] border border-white/20 cursor-pointer active:scale-[0.99] transition-transform">
                 <input
                   type="checkbox"
                   checked={rulesAccepted}
                   onChange={(e) => setRulesAccepted(e.target.checked)}
                   className="w-4 h-4 accent-[#1895C7] mt-0.5"
                 />
-                <span className="text-xs text-white/75 leading-relaxed">
+                <span className="text-xs text-white/80 leading-relaxed">
                   <strong>{t.booking.rulesLabel}.</strong> {t.booking.rulesHint}
                 </span>
               </label>
@@ -412,7 +421,7 @@ export default function ReservationForm({
                 disabled={!canSubmit}
                 className={`w-full h-12 flex items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all duration-200 ${
                   canSubmit
-                    ? 'bg-[#1895C7] text-white hover:bg-[#1279AE] active:scale-[0.99] cursor-pointer'
+                    ? 'bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white hover:from-[#1895C7] hover:to-[#1279AE] active:scale-[0.99] cursor-pointer shadow-[0_12px_28px_-12px_rgba(32,177,238,0.55)]'
                     : 'bg-white/10 text-white/40 cursor-not-allowed'
                 }`}
               >
@@ -432,7 +441,7 @@ export default function ReservationForm({
           </form>
         </div>
       ) : (
-        <div className="flex h-full flex-col rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] p-6 md:p-7 backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
+        <div className="flex h-full flex-col rounded-[20px] bg-white/[0.05] border border-white/[0.18] p-6 md:p-7 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
           <span className="text-[10px] font-bold uppercase tracking-widest text-[#60A5FA]">
             {t.booking.dateSelected}
           </span>
@@ -454,25 +463,25 @@ export default function ReservationForm({
                     occupied
                       ? 'opacity-50 cursor-not-allowed bg-white/[0.03] border-white/10'
                       : active
-                        ? 'border-[#1895C7] bg-[#1895C7]/15 ring-1 ring-[#1895C7]/30 cursor-pointer'
-                        : 'border-white/10 bg-white/[0.05] hover:border-white/15 hover:bg-white/[0.08] cursor-pointer'
+                        ? 'border-white bg-white/[0.95] ring-1 ring-[#20B1EE]/40 shadow-[0_16px_36px_-18px_rgba(0,0,0,0.6)] cursor-pointer'
+                        : 'border-white/20 bg-white/[0.08] hover:border-white/40 hover:bg-white/[0.12] cursor-pointer'
                   }`}
                 >
                   <span className={`w-2.5 h-2.5 rounded-full ${opt.dot} shrink-0 ${occupied ? 'opacity-60' : ''}`} />
                   <span className="flex-1">
-                    <span className="block text-sm font-bold text-white">
+                    <span className={`block text-sm font-bold ${active ? 'text-[#0F172A]' : 'text-white'}`}>
                       {opt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight}
                       {occupied && (
                         <span className="text-xs font-medium text-red-400/80 ml-1">(Ocupado)</span>
                       )}
                     </span>
-                    <span className={`block text-xs ${active ? 'text-[#E2E8F0]' : 'text-[#E2E8F0]/75'}`}>
+                    <span className={`block text-xs ${active ? 'text-[#0F172A]/70' : 'text-white/75'}`}>
                       {opt.hours}
                     </span>
                   </span>
                   <span
                     className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                      occupied ? 'border-white/15' : active ? 'border-[#1895C7]' : 'border-white/25'
+                      occupied ? 'border-white/15' : active ? 'border-[#1895C7]' : 'border-white/40'
                     }`}
                   >
                     {active && !occupied && <span className="w-2.5 h-2.5 rounded-full bg-[#1895C7]" />}
@@ -482,25 +491,25 @@ export default function ReservationForm({
             })}
           </div>
 
-          <div className="mt-6 flex items-start gap-3 rounded-lg border-l-4 border-[#EAB308] bg-[rgba(234,179,8,0.08)] px-4 py-3">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#EAB308]" />
+          <div className="mt-6 flex items-start gap-3 rounded-lg border border-white/[0.12] border-l-4 border-l-[#20B1EE] bg-white/[0.06] px-4 py-3">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#20B1EE]" />
             <div>
-              <p className="text-[0.9rem] font-semibold text-[#FEF08A]">{t.booking.policyTitle}</p>
-              <p className="mt-1 text-[0.825rem] text-white/80 leading-relaxed">{t.booking.policyBody}</p>
+              <p className="text-[0.9rem] font-semibold text-white">{t.booking.policyTitle}</p>
+              <p className="mt-1 text-[0.825rem] text-white/75 leading-relaxed">{t.booking.policyBody}</p>
             </div>
           </div>
 
           <div className="mt-6 pt-5 border-t border-white/10">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/70">{t.booking.totalLabel}</span>
+              <span className="text-sm font-bold text-white">{t.booking.totalLabel}</span>
               <span className="text-3xl font-bold text-white tabular-nums">
-                ${FEE}.00 <span className="text-xs font-semibold text-white/60">USD</span>
+                ${fee}.00 <span className="text-xs font-semibold text-white/60">USD</span>
               </span>
             </div>
             <label className="mt-4 flex items-start gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition-all duration-200 active:scale-[0.99] ${
               policyAccepted
-                ? 'border-[#1895C7]/40 bg-[#1895C7]/10'
-                : 'border-white/10 bg-white/[0.04] hover:border-white/20'
+                ? 'border-[#20B1EE]/60 bg-[#1895C7]/15'
+                : 'border-white/20 bg-white/[0.08] hover:border-white/35'
             }">
               <input
                 type="checkbox"
@@ -512,7 +521,7 @@ export default function ReservationForm({
                 className={`mt-0.5 w-[18px] h-[18px] rounded-md border flex items-center justify-center shrink-0 transition-all duration-200 ${
                   policyAccepted
                     ? 'bg-[#1895C7] border-[#1895C7]'
-                    : 'border-white/30 bg-transparent'
+                    : 'border-white/60 bg-transparent'
                 }`}
               >
                 {policyAccepted && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
@@ -526,7 +535,7 @@ export default function ReservationForm({
               disabled={!hasSchedule || !policyAccepted}
               className={`mt-4 w-full h-12 flex items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all duration-200 ${
                 hasSchedule && policyAccepted
-                  ? 'bg-[#1895C7] text-white hover:bg-[#1279AE] active:scale-[0.99] cursor-pointer'
+                  ? 'bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white hover:from-[#1895C7] hover:to-[#1279AE] active:scale-[0.99] cursor-pointer shadow-[0_12px_28px_-12px_rgba(32,177,238,0.55)]'
                   : 'bg-white/10 text-white/40 cursor-not-allowed'
               }`}
             >

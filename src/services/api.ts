@@ -3,6 +3,7 @@ export const GAS_URL = 'https://script.google.com/macros/s/AKfycbyffs5W_V-sS0FVY
 export interface MonthDataRow {
   rowIndex: number
   name: string
+  email?: string
   date: string
   schedule: string
   fee: number

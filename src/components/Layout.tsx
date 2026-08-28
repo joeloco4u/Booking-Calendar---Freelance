@@ -1,5 +1,7 @@
-import Header from './Header'
+import Header, { type AdminSection } from './Header'
 import type { Lang } from '../i18n'
+
+export type { AdminSection }
 
 interface LayoutProps {
   children: React.ReactNode
@@ -7,6 +9,8 @@ interface LayoutProps {
   headerSubtitle?: string
   role: 'freelancer' | 'admin'
   lang: Lang
+  activeSection: AdminSection | null
+  onNavigate: (section: AdminSection) => void
   onLangChange: (lang: Lang) => void
   onRoleChange: (role: 'freelancer' | 'admin') => void
   onBookNow: () => void
@@ -18,6 +22,8 @@ export default function Layout({
   headerSubtitle,
   role,
   lang,
+  activeSection,
+  onNavigate,
   onLangChange,
   onRoleChange,
   onBookNow,
@@ -29,6 +35,8 @@ export default function Layout({
         subtitle={headerSubtitle}
         role={role}
         lang={lang}
+        activeSection={activeSection}
+        onNavigate={onNavigate}
         onLangChange={onLangChange}
         onRoleChange={onRoleChange}
         onBookNow={onBookNow}

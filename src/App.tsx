@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import Layout from './components/Layout'
+import Layout, { type AdminSection } from './components/Layout'
 import Calendar from './components/Calendar'
 import ReservationForm from './components/ReservationForm'
 import AdminDashboard from './components/AdminDashboard'
+import AdminBookings from './components/AdminBookings'
+import AdminCalendar from './components/AdminCalendar'
+import AdminUsers from './components/AdminUsers'
+import AdminSettings from './components/AdminSettings'
 import FacilityLanding from './components/FacilityLanding'
 import LandingPage from './components/LandingPage'
 import ViewToggle from './components/ViewToggle'
@@ -14,10 +18,22 @@ const MONTH_NAMES_ES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ]
 
+const DEFAULT_RULES = [
+  'Respeta el horario de tu turno.',
+  'Ducha previa obligatoria antes de ingresar a la piscina.',
+  'Música a volumen adecuado que no moleste a vecinos.',
+  'Sigue las instrucciones del encargado del área.',
+  'Cancelaciones con menos de 1 semana de antelación aplican una penalización de $10 USD.',
+]
+
 export default function App() {
   const [siteView, setSiteView] = useState<'landing' | 'app'>('landing')
   const [role, setRole] = useState<'freelancer' | 'admin'>('freelancer')
   const [lang, setLang] = useState<Lang>('es')
+  const [adminSection, setAdminSection] = useState<AdminSection>('dashboard')
+  const [adminAuthed, setAdminAuthed] = useState(false)
+  const [fee, setFee] = useState(60)
+  const [rules, setRules] = useState<string[]>(DEFAULT_RULES)
   const [selectedDate, setSelectedDate] = useState<number | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -132,20 +148,72 @@ export default function App() {
           headerSubtitle={config.subtitle}
           role={role}
           lang={lang}
+          activeSection={adminSection}
+          onNavigate={setAdminSection}
           onLangChange={setLang}
           onRoleChange={setRole}
           onBookNow={handleBookNow}
         >
           {isAdmin ? (
-            <AdminDashboard
-              monthData={monthData}
-              onMonthDataChange={setMonthData}
-              currentMonthStr={currentMonthStr}
-              onRefresh={refreshData}
-              lang={lang}
-              viewDate={viewDate}
-              setViewDate={setViewDate}
-            />
+            !adminAuthed ? (
+              <AdminDashboard
+                monthData={monthData}
+                onMonthDataChange={setMonthData}
+                currentMonthStr={currentMonthStr}
+                onRefresh={refreshData}
+                lang={lang}
+                viewDate={viewDate}
+                setViewDate={setViewDate}
+                authed={false}
+                onAuthed={() => setAdminAuthed(true)}
+                fee={fee}
+                rules={rules}
+              />
+            ) : adminSection === 'dashboard' ? (
+              <AdminDashboard
+                monthData={monthData}
+                onMonthDataChange={setMonthData}
+                currentMonthStr={currentMonthStr}
+                onRefresh={refreshData}
+                lang={lang}
+                viewDate={viewDate}
+                setViewDate={setViewDate}
+                authed={true}
+                onAuthed={() => setAdminAuthed(true)}
+                fee={fee}
+                rules={rules}
+              />
+            ) : adminSection === 'bookings' ? (
+              <AdminBookings
+                monthData={monthData}
+                onMonthDataChange={setMonthData}
+                currentMonthStr={currentMonthStr}
+                onRefresh={refreshData}
+                lang={lang}
+                rules={rules}
+              />
+            ) : adminSection === 'calendar' ? (
+              <AdminCalendar
+                viewDate={viewDate}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                monthData={monthData}
+                onMonthDataChange={setMonthData}
+                currentMonthStr={currentMonthStr}
+                onRefresh={refreshData}
+                lang={lang}
+              />
+            ) : adminSection === 'users' ? (
+              <AdminUsers monthData={monthData} lang={lang} fee={fee} />
+            ) : (
+              <AdminSettings
+                fee={fee}
+                onFeeChange={setFee}
+                rules={rules}
+                onRulesChange={setRules}
+                lang={lang}
+              />
+            )
           ) : (
             <>
               <FacilityLanding lang={lang} />
@@ -176,6 +244,7 @@ export default function App() {
                   currentMonthStr={currentMonthStr}
                   onRefresh={refreshData}
                   lang={lang}
+                  fee={fee}
                 />
               </section>
             </>

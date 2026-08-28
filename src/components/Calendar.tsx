@@ -15,6 +15,7 @@ interface CalendarProps {
   monthData: MonthDataRow[]
   isLoading?: boolean
   lang: Lang
+  admin?: boolean
 }
 
 export default function Calendar({
@@ -28,6 +29,7 @@ export default function Calendar({
   monthData,
   isLoading = false,
   lang,
+  admin = false,
 }: CalendarProps) {
   const t = translations[lang]
   const today = new Date()
@@ -99,17 +101,24 @@ export default function Calendar({
   const isWeekday = (day: number) => !isWeekend(day)
 
   const isDisabled = (day: number) => {
+    if (admin) return false
     if (isWeekday(day) || isPast(day)) return true
     const status = dayStatuses.get(day)
     return status === 'occupied'
   }
 
   const dayClass = (day: number, status: 'occupied' | 'partial' | 'available' | null) => {
+    if (admin) {
+      if (isSelected(day)) {
+        return 'bg-[#20B1EE] text-white font-bold ring-1 ring-[#20B1EE]/40 shadow-[0_10px_24px_-12px_rgba(32,177,238,0.55)]'
+      }
+      return 'text-white font-semibold hover:scale-110 hover:ring-2 hover:ring-white/50 hover:bg-white/[0.1] transition-all duration-200 cursor-pointer'
+    }
     if (isSelected(day)) {
-      return 'bg-[#1895C7] text-white font-bold ring-1 ring-white/25 shadow-[0_10px_24px_-12px_rgba(24,149,199,0.55)]'
+      return 'bg-white text-[#1895C7] font-bold ring-1 ring-white/60 shadow-[0_10px_24px_-12px_rgba(255,255,255,0.4)]'
     }
     if (isToday(day)) {
-      return 'text-[#60A5FA] ring-1 ring-[#1895C7]/40 font-bold'
+      return 'text-[#7CD0F4] ring-1 ring-white/40 font-bold'
     }
     if (isPast(day)) {
       return 'text-white/[0.4] cursor-not-allowed'
@@ -120,7 +129,7 @@ export default function Calendar({
     if (status === 'occupied') {
       return 'text-white/45 font-medium'
     }
-    return 'text-white/[0.85] font-medium hover:scale-110 hover:ring-2 hover:ring-white/30 hover:bg-white/[0.06] transition-all duration-200'
+    return 'text-white font-semibold hover:scale-110 hover:ring-2 hover:ring-white/50 hover:bg-white/[0.1] transition-all duration-200'
   }
 
   const dotClass = (status: 'occupied' | 'partial' | 'available' | null) => {
@@ -131,7 +140,7 @@ export default function Calendar({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-[20px] bg-[rgba(30,41,59,0.7)] border border-white/[0.12] p-5 md:p-6 backdrop-blur-lg shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
+    <div className="flex h-full flex-col rounded-[20px] bg-white/[0.05] border border-white/[0.18] p-5 md:p-6 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
       <div className="flex items-center justify-between mb-5">
         <button
           onClick={onPrevMonth}
@@ -155,7 +164,7 @@ export default function Calendar({
         {t.calendar.weekdays.map((day) => (
           <div
             key={day}
-            className="text-center text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] py-2"
+            className="text-center text-[11px] font-bold uppercase tracking-wider text-white/80 py-2"
           >
             {day}
           </div>
