@@ -143,6 +143,8 @@ export default function App() {
               currentMonthStr={currentMonthStr}
               onRefresh={refreshData}
               lang={lang}
+              viewDate={viewDate}
+              setViewDate={setViewDate}
             />
           ) : (
             <>
