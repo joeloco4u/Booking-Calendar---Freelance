@@ -351,7 +351,7 @@ export default function AdminBookings({
                     {t.admin.colAmount}
                   </p>
                   <p className="mt-1 text-lg font-bold text-white tabular-nums">
-                    ${detailTarget.fee}.00
+                    ${detailTarget.fee > 0 ? detailTarget.fee : fee}.00
                   </p>
                 </div>
                 <div className="rounded-2xl bg-[#102A43]/60 border border-white/[0.06] p-4">
