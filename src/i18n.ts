@@ -84,7 +84,7 @@ const es = {
     fullName: 'Nombre completo',
     phoneLabel: 'Teléfono',
     emailLabel: 'Correo electrónico',
-    phoneInvalid: 'Número de teléfono no válido',
+    phoneInvalid: 'Formato de teléfono inválido',
     emailInvalid: 'Formato de correo inválido',
     extrasTitle: 'Extras / solicitudes especiales',
     extraParrillera: 'Solicitar parrillera',
