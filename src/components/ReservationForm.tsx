@@ -125,27 +125,22 @@ export default function ReservationForm({
 
   const PHONE_MAX_LEN = 15
 
-  const validatePhone = (value: string) => {
-    const trimmed = value.trim()
-    if (!trimmed) return false
-    const digits = (trimmed.match(/\d/g) || []).length
-    const validChars = /^\+?[\d\s-]*$/.test(trimmed)
-    return digits >= 7 && trimmed.length <= PHONE_MAX_LEN && validChars
-  }
+  // Accepts optional '+', country code, optional spaces/dashes, and valid digit lengths (10-15 total digits)
+  const phoneRegex = /^\+?[\d\s-]{10,16}$/
+  const isValidPhone = phone.trim() === '' || phoneRegex.test(phone.trim())
 
-  const validateEmail = (value: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
-  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const isValidEmail = email.trim() === '' || emailRegex.test(email.trim())
 
   const handlePhoneChange = (value: string) => {
     const sanitized = value.replace(/[^\d\s+-]/g, '').slice(0, PHONE_MAX_LEN)
     setPhone(sanitized)
-    setPhoneError(sanitized !== '' && !validatePhone(sanitized))
+    setPhoneError(sanitized !== '' && !phoneRegex.test(sanitized.trim()))
   }
 
   const handleEmailChange = (value: string) => {
     setEmail(value)
-    setEmailError(value !== '' && !validateEmail(value))
+    setEmailError(value.trim() !== '' && !emailRegex.test(value.trim()))
   }
 
   const matchedRow = useMemo(() => {
@@ -164,8 +159,10 @@ export default function ReservationForm({
     !isWeekdaySelected &&
     matchedRow !== null &&
     fullName.trim() !== '' &&
-    validatePhone(phone) &&
-    validateEmail(email) &&
+    phone.trim() !== '' &&
+    isValidPhone &&
+    email.trim() !== '' &&
+    isValidEmail &&
     rulesAccepted
 
   const availableSchedules = getAvailableSchedules(dayType)
@@ -223,12 +220,13 @@ export default function ReservationForm({
     const scheduleLabel = selectedOpt
       ? `${selectedOpt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight} · ${selectedOpt.hours}`
       : schedule
+    const finalNote = `Tel: ${phone.trim()} | Extras: ${extras.join(', ')}`
     submitBooking({
       name: fullName.trim(),
       fee: FEE,
       row: matchedRow.rowIndex,
       mes: currentMonthStr,
-      note: extras.join(', '),
+      note: finalNote,
       contact: email.trim(),
       schedule: scheduleLabel,
       date: displayTitle,

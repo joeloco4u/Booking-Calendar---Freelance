@@ -41,7 +41,7 @@ export default function Header({
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-2 md:gap-3">
+      <div className="flex items-center justify-end gap-1.5 md:gap-3 min-w-0">
         {!isAdmin && (
           <button
             onClick={onBookNow}
@@ -51,7 +51,7 @@ export default function Header({
           </button>
         )}
 
-        <div className="flex items-center p-1 rounded-full bg-white/[0.08] border border-white/15">
+        <div className="flex items-center p-1 rounded-full bg-white/[0.08] border border-white/15 shrink-0">
           {(['es', 'en'] as const).map((code) => (
             <button
               key={code}
@@ -69,7 +69,7 @@ export default function Header({
 
         <button
           onClick={() => onRoleChange(isAdmin ? 'freelancer' : 'admin')}
-          className="flex items-center gap-2 px-3 h-9 rounded-full bg-white/[0.08] border border-white/15 text-sm text-white/90 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-3 h-9 rounded-full bg-white/[0.08] border border-white/15 text-sm text-white/90 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer shrink-0"
           title="Cambiar rol (demo)"
         >
           {isAdmin ? <Shield className="w-4 h-4 text-cyan-glow" /> : <User className="w-4 h-4 text-white/60" />}

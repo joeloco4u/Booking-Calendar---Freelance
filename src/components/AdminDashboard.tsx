@@ -195,20 +195,20 @@ export default function AdminDashboard({
 
   return (
     <div className="rounded-3xl bg-marine/95 backdrop-blur-xl border border-white/10 p-5 md:p-7 shadow-[0_30px_60px_-24px_rgba(11,25,44,0.9)] animate-fade-in-up">
-      <div className="flex items-center justify-between gap-4 bg-white/[0.04] p-4 rounded-xl border border-white/10 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.04] p-4 rounded-xl border border-white/10 mb-6">
         <h2 className="text-lg font-semibold text-slate-200">Admin Dashboard</h2>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-2">
           <button
             onClick={handlePrevMonth}
-            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-white font-medium min-w-[130px] text-center">{currentMonthStr}</span>
+          <span className="text-white font-medium min-w-[130px] text-center truncate">{currentMonthStr}</span>
           <button
             onClick={handleNextMonth}
-            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
             aria-label="Next month"
           >
             <ChevronRight className="w-5 h-5" />
@@ -216,7 +216,7 @@ export default function AdminDashboard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {kpiCards.map((card, idx) => {
           const Icon = card.icon
           return (
@@ -236,7 +236,7 @@ export default function AdminDashboard({
         })}
       </div>
 
-      <div className="mt-7 flex items-center gap-2 pb-2">
+      <div className="mt-7 flex flex-wrap items-center gap-2 pb-2">
         <button
           onClick={() => setActiveTab('pending')}
           className={`px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
@@ -264,8 +264,8 @@ export default function AdminDashboard({
         )}
       </div>
 
-      <div className="mt-5 overflow-x-auto">
-        <div className="min-w-[920px] space-y-2 py-2">
+      <div className="mt-5 overflow-x-auto w-full">
+        <div className="min-w-[700px] space-y-2 py-2">
           <div
             className={`${gridCols} px-4 pb-2 text-[11px] font-bold uppercase tracking-widest text-white/35`}
           >
