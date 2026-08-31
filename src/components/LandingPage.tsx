@@ -6,10 +6,12 @@ import {
   ArrowRight,
   ArrowDown,
   Menu,
+  X,
   CalendarDays,
   Sun,
   Send,
   ChevronDown,
+  Home,
 } from 'lucide-react'
 import { translations, type Lang } from '../i18n'
 import poolA from '../images/IMG_5622-_1_.png'
@@ -61,6 +63,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
 
   const [activeIdx, setActiveIdx] = useState(0)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const navItems = [
     { href: '#included', label: t.landing.navIncluded },
@@ -68,6 +71,23 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
     { href: '#how', label: t.landing.navHow },
     { href: '#faq', label: t.landing.navFaq },
   ]
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = '' }
+    }
+  }, [menuOpen])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && menuOpen) setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  const closeMenu = () => setMenuOpen(false)
 
   const moveIndicator = useCallback(() => {
     const headerRect = headerRef.current?.getBoundingClientRect()
@@ -171,13 +191,14 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
           >
             {t.landing.heroCta}
           </button>
-          <a
-            href="#top"
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-white/80 hover:bg-white/[0.08] transition-colors"
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
             aria-label="Menu"
+            aria-expanded={menuOpen}
           >
             <Menu className="w-5 h-5" />
-          </a>
+          </button>
         </div>
       </div>
       <span
@@ -189,6 +210,72 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
           width: 0,
         }}
       />
+
+      {menuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
+          <div
+            className="absolute inset-0 bg-[#020A14]/70 backdrop-blur-sm"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="relative w-[min(85vw,360px)] h-full bg-[#0a192f] border-l border-white/[0.08] shadow-[-20px_0_60px_-20px_rgba(0,0,0,0.8)] flex flex-col animate-slide-in-right">
+            <div className="flex items-center justify-between px-5 h-16 border-b border-white/[0.08] shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img
+                  src="/FlatamLogo.png"
+                  alt="Logo"
+                  className="w-8 h-8 rounded-full object-cover ring-1 ring-cyan-glow/40"
+                />
+                <span className="text-sm font-bold text-white tracking-tight truncate">Freelance Latam</span>
+              </div>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white transition-all cursor-pointer"
+                aria-label="Cerrar menú"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#7A93B5] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <button
+                onClick={() => { closeMenu(); onBookNow() }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#7A93B5] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
+              >
+                <Home className="w-[18px] h-[18px] shrink-0" />
+                {t.landing.heroCta}
+              </button>
+            </nav>
+
+            <div className="border-t border-white/[0.08] p-4 space-y-3 shrink-0">
+              <div className="flex items-center gap-2">
+                {(['es', 'en'] as const).map((code) => (
+                  <button
+                    key={code}
+                    onClick={() => onLangChange(code)}
+                    className={`flex-1 h-9 rounded-xl text-sm font-bold uppercase transition-all active:scale-[0.97] cursor-pointer ${
+                      lang === code
+                        ? 'bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white'
+                        : 'bg-white/[0.06] border border-white/[0.08] text-white/50 hover:text-white hover:bg-white/[0.1]'
+                    }`}
+                  >
+                    {code}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }
