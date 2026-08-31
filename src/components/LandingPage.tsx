@@ -680,7 +680,7 @@ function CtaBanner({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
         <p className="mt-4 text-base text-white/70 mx-auto max-w-xl">{t.landing.ctaSub}</p>
         <button
           onClick={onBookNow}
-          className="mt-9 inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#0E2138] border border-[#1895C7] text-white text-base font-bold hover:bg-[#142A44] active:scale-95 transition-all cursor-pointer"
+          className="mt-9 inline-flex items-center gap-2 px-9 py-4 rounded-full bg-gradient-to-r from-[#2baee6] to-[#1895c7] text-white text-base font-bold shadow-[0_10px_30px_-8px_rgba(24,149,199,0.8)] hover:brightness-105 active:scale-95 transition-all cursor-pointer"
         >
           <Waves className="w-5 h-5" />
           {t.landing.cta} <ArrowRight className="w-4 h-4" />
@@ -726,6 +726,27 @@ function LandingFooter({ lang }: { lang: Lang }) {
   )
 }
 
+function FloatingBookButton({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
+  const t = translations[lang]
+  return (
+    <button
+      onClick={onBookNow}
+      className="group fixed bottom-5 right-5 z-30 flex h-14 items-center rounded-full bg-gradient-to-br from-[#2baee6] to-[#1895c7] text-white shadow-[0_12px_30px_-6px_rgba(24,149,199,0.9)] ring-1 ring-white/25 outline outline-4 outline-[#1895c7]/25 hover:scale-105 active:scale-95 transition-all cursor-pointer overflow-hidden justify-center"
+      aria-label={t.landing.heroCta}
+      title={t.landing.heroCta}
+    >
+      <span className="flex w-14 shrink-0 items-center justify-center">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
+          <CalendarDays className="h-5.5 w-5.5" />
+        </span>
+      </span>
+      <span className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-bold pr-0 transition-all duration-300 group-hover:max-w-[110px] group-hover:pr-4">
+        {t.landing.heroCta}
+      </span>
+    </button>
+  )
+}
+
 export default function LandingPage({ lang, onLangChange, onBookNow }: LandingPageProps) {
   const navigate = useNavigate()
   return (
@@ -745,6 +766,7 @@ export default function LandingPage({ lang, onLangChange, onBookNow }: LandingPa
         <CtaBanner lang={lang} onBookNow={onBookNow} />
       </main>
       <LandingFooter lang={lang} />
+      <FloatingBookButton lang={lang} onBookNow={onBookNow} />
     </div>
   )
 }
