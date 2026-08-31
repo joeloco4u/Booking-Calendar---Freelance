@@ -184,23 +184,22 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
         </nav>
 
         <div className="flex min-w-0 items-center justify-end gap-3">
-          <div className="hidden lg:block">
+          <div className="hidden sm:block">
             <LanguageToggle lang={lang} onLangChange={onLangChange} />
           </div>
-          <button
-            onClick={onBookNow}
-            className="hidden lg:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#1279AE] active:scale-95 transition-all cursor-pointer"
-          >
-            {t.landing.heroCta}
-          </button>
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="inline-flex items-center justify-center w-9 h-9 mr-[-4px] rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
-            aria-label="Menu"
-            aria-expanded={menuOpen}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="sm:hidden">
+              <LanguageToggle lang={lang} onLangChange={onLangChange} />
+            </div>
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="inline-flex items-center justify-center w-9 h-9 mr-[-4px] rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
       <span

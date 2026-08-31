@@ -171,29 +171,31 @@ export default function Header({
             </Link>
           ) : null}
 
-          <div className="hidden lg:flex items-center p-1 rounded-full bg-white/[0.06] border border-white/15">
-            {(['es', 'en'] as const).map((code) => (
-              <button
-                key={code}
-                onClick={() => onLangChange(code)}
-                className={`px-2.5 h-7 rounded-full text-xs font-bold uppercase transition-all active:scale-95 cursor-pointer ${
-                  lang === code
-                    ? 'bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white'
-                    : 'text-white/50 hover:text-white'
-                }`}
-              >
-                {code}
-              </button>
-            ))}
-          </div>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/15">
+              {(['es', 'en'] as const).map((code) => (
+                <button
+                  key={code}
+                  onClick={() => onLangChange(code)}
+                  className={`px-2.5 h-7 rounded-full text-xs font-bold uppercase transition-all active:scale-95 cursor-pointer ${
+                    lang === code
+                      ? 'bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white'
+                      : 'text-white/50 hover:text-white'
+                  }`}
+                >
+                  {code}
+                </button>
+              ))}
+            </div>
 
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.06] border border-white/15 text-white/80 hover:text-white hover:bg-white/[0.12] active:scale-95 transition-all cursor-pointer"
-            aria-label={t.header.mobileCloseMenu}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.06] border border-white/15 text-white/80 hover:text-white hover:bg-white/[0.12] active:scale-95 transition-all cursor-pointer"
+              aria-label={t.header.mobileCloseMenu}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
