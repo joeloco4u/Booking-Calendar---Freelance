@@ -123,7 +123,15 @@ function doPost(e) {
                   "<h4 style='color: #991b1b; margin-top: 0;'>⚠️ POLÍTICA DE CANCELACIÓN Y MULTA</h4>" +
                   "<p style='margin-bottom: 0; font-size: 14px; color: #7f1d1d;'>Las cancelaciones realizadas con menos de <strong>7 días de anticipación</strong> a la fecha del evento, o la inasistencia, generarán una multa automática de <strong>$10 USD descontados directamente de tu nómina</strong>.</p>" +
                 "</div>" +
-                "<p style='font-size: 12px; color: #64748b; margin-top: 30px;'>Normas: Ducha previa obligatoria. Volumen moderado. Prohibido papelillo. No sentarse en barandas ni jardineras.</p>" +
+                "<div style='background-color: #f0f9ff; border: 1px solid #bae6fd; border-left: 4px solid #38bdf8; padding: 15px; border-radius: 6px; margin: 20px 0;'>" +
+  "<h4 style='color: #0f172a; margin-top: 0; margin-bottom: 12px; font-size: 15px;'>🏊 Normas del Área de Piscina</h4>" +
+  "<ul style='list-style-type: none; padding: 0; margin: 0; color: #334155; font-size: 14px;'>" +
+    "<li style='margin-bottom: 8px;'>🚿 Ducha previa obligatoria antes de ingresar.</li>" +
+    "<li style='margin-bottom: 8px;'>🔊 Mantener un volumen de música moderado.</li>" +
+    "<li style='margin-bottom: 8px;'>🚫 Estrictamente prohibido el uso de papelillo.</li>" +
+    "<li style='margin-bottom: 0;'>⚠️ No sentarse en las barandas ni en las jardineras.</li>" +
+  "</ul>" +
+"</div>" +
               "</div>" +
             "</div>";
 

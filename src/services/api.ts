@@ -1,4 +1,4 @@
-export const GAS_URL = 'https://script.google.com/macros/s/AKfycbx-Axkgq8eWySsDzIZ4_tyor0HsnOjF2EcObvZsSV2ByneA6RxdoBi_BeOJw1ViAqhELA/exec'
+export const GAS_URL = 'https://script.google.com/macros/s/AKfycby7UIi-i6zkSOS0MZaU_ME3cGKOBl3IVXKSB9GZJsm3M4JEBIIE_I7GO98Xt8oIMLQatw/exec'
 
 export interface MonthDataRow {
   rowIndex: number
