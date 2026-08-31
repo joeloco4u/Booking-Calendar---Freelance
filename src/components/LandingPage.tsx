@@ -193,7 +193,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
             </div>
             <button
               onClick={() => setMenuOpen(true)}
-              className="inline-flex items-center justify-center w-9 h-9 mr-[-4px] rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
+              className="lg:hidden inline-flex items-center justify-center w-9 h-9 mr-[-4px] rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
               aria-label="Menu"
               aria-expanded={menuOpen}
             >

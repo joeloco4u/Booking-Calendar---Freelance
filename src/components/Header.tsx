@@ -190,7 +190,7 @@ export default function Header({
 
             <button
               onClick={() => setMenuOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.06] border border-white/15 text-white/80 hover:text-white hover:bg-white/[0.12] active:scale-95 transition-all cursor-pointer"
+              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.06] border border-white/15 text-white/80 hover:text-white hover:bg-white/[0.12] active:scale-95 transition-all cursor-pointer"
               aria-label={t.header.mobileCloseMenu}
             >
               <Menu className="w-5 h-5" />
