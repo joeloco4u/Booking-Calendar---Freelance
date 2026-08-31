@@ -12,8 +12,6 @@ interface LayoutProps {
   activeSection: AdminSection | null
   onNavigate: (section: AdminSection) => void
   onLangChange: (lang: Lang) => void
-  onRoleChange: (role: 'freelancer' | 'admin') => void
-  onBookNow: () => void
 }
 
 export default function Layout({
@@ -25,8 +23,6 @@ export default function Layout({
   activeSection,
   onNavigate,
   onLangChange,
-  onRoleChange,
-  onBookNow,
 }: LayoutProps) {
   return (
     <div className="flex flex-col h-screen bg-[#0F172A] overflow-hidden">
@@ -38,8 +34,6 @@ export default function Layout({
         activeSection={activeSection}
         onNavigate={onNavigate}
         onLangChange={onLangChange}
-        onRoleChange={onRoleChange}
-        onBookNow={onBookNow}
       />
       <main className="flex-1 overflow-auto p-4 md:p-6 space-y-6">{children}</main>
     </div>

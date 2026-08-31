@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import {
   Shield,
   User,
@@ -22,8 +23,6 @@ interface HeaderProps {
   activeSection: AdminSection | null
   onNavigate: (section: AdminSection) => void
   onLangChange: (lang: Lang) => void
-  onRoleChange: (role: 'freelancer' | 'admin') => void
-  onBookNow: () => void
 }
 
 type NavKey = 'navDashboard' | 'navBookings' | 'navCalendar' | 'navUsers' | 'navSettings'
@@ -44,9 +43,9 @@ export default function Header({
   activeSection,
   onNavigate,
   onLangChange,
-  onRoleChange,
-  onBookNow,
 }: HeaderProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const isAdmin = role === 'admin'
   const t = translations[lang]
   const [menuOpen, setMenuOpen] = useState(false)
@@ -56,10 +55,17 @@ export default function Header({
     setMenuOpen(false)
   }
 
+  const handleRoleChange = () => {
+    navigate(isAdmin ? '/reservar' : '/admin')
+  }
+
   return (
     <header className="sticky top-0 z-40 shrink-0 bg-[#0B1F35]/85 backdrop-blur-xl border-b border-white/[0.07]">
       <div className="h-16 px-4 md:px-6 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
+        <Link
+          to="/"
+          className="flex items-center gap-2 md:gap-x-3 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <img
             src="/FlatamLogo.png"
             alt="Freelance Latam Logo"
@@ -73,7 +79,7 @@ export default function Header({
               {isAdmin ? 'Pool & Facilities' : `${title} · ${subtitle ?? ''}`}
             </p>
           </div>
-        </div>
+        </Link>
 
         {isAdmin && (
           <nav className="hidden lg:flex items-center gap-1">
@@ -100,14 +106,22 @@ export default function Header({
         )}
 
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          {!isAdmin && (
-            <button
-              onClick={onBookNow}
+          {location.pathname === '/reservar' ? (
+            <Link
+              to="/"
+              className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-xl bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              {t.header.bookHome}
+            </Link>
+          ) : location.pathname === '/' ? (
+            <Link
+              to="/reservar"
+              state={{ scrollToBooking: true }}
               className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-xl bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
               {t.header.bookNow}
-            </button>
-          )}
+            </Link>
+          ) : null}
 
           {isAdmin && (
             <button
@@ -137,7 +151,7 @@ export default function Header({
           </div>
 
           <button
-            onClick={() => onRoleChange(isAdmin ? 'freelancer' : 'admin')}
+            onClick={handleRoleChange}
             className="flex items-center gap-2 px-3 h-9 rounded-full bg-white/[0.06] border border-white/15 text-sm text-white/80 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer"
             title="Cambiar rol (demo)"
           >

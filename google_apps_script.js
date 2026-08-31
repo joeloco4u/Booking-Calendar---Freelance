@@ -65,6 +65,15 @@ function doPost(e) {
     var row = payload.row;
     var sheetName = payload.mes;
 
+    if (action === 'login') {
+      var password = payload.password;
+      if (password === 'Freelance2026') {
+        return jsonResponse(e, { success: true });
+      } else {
+        return jsonResponse(e, { success: false, error: 'Contraseña incorrecta' });
+      }
+    }
+
     if (!sheetName) return jsonResponse(e, { success: false, error: 'Missing field: mes' });
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();

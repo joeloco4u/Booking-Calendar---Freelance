@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Clock, DollarSign, CalendarCheck, ChevronLeft, ChevronRight, Lock } from 'lucide-react'
+import { Clock, DollarSign, CalendarCheck, ChevronLeft, ChevronRight, Lock, Loader2 } from 'lucide-react'
 import type { MonthDataRow } from '../services/api'
+import { verifyAdminPassword } from '../services/api'
 import { translations, type Lang } from '../i18n'
 import AdminBookings from './AdminBookings'
 
@@ -32,7 +33,9 @@ export default function AdminDashboard({
   rules,
 }: AdminDashboardProps) {
   const t = translations[lang]
-  const [pin, setPin] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handlePrevMonth = () => {
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
@@ -42,14 +45,24 @@ export default function AdminDashboard({
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (pin === '1234') {
-      setPin('')
-      onAuthed()
-    } else {
-      alert(t.admin.pinError)
-      setPin('')
+    if (!password || isLoading) return
+    setIsLoading(true)
+    setError('')
+    try {
+      const res = await verifyAdminPassword(password)
+      if (res.success) {
+        setPassword('')
+        onAuthed()
+      } else {
+        setError(res.error || t.admin.pinError)
+        setPassword('')
+      }
+    } catch {
+      setError(t.admin.pinError)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -58,7 +71,7 @@ export default function AdminDashboard({
       <div className="flex-1 flex items-center justify-center p-8 h-full animate-fade-in-up">
         <form
           onSubmit={handleLogin}
-          className="rounded-3xl bg-marine border border-white/10 p-8 shadow-[0_30px_60px_-24px_rgba(11,25,44,0.9)] flex flex-col items-center space-y-4 w-80 animate-fade-in-up"
+          className="rounded-3xl bg-marine/95 border border-white/10 p-8 shadow-[0_30px_60px_-24px_rgba(11,25,44,0.9)] flex flex-col items-center space-y-4 w-80 animate-fade-in-up"
         >
           <div className="w-14 h-14 rounded-2xl bg-cyan-glow/10 flex items-center justify-center">
             <Lock className="w-6 h-6 text-cyan-glow" />
@@ -67,16 +80,25 @@ export default function AdminDashboard({
           <input
             type="password"
             placeholder={t.admin.loginPlaceholder}
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2.5 bg-white/[0.06] border border-white/10 rounded-xl text-center text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-glow/60 tracking-widest transition-all"
             autoFocus
           />
+          {error && <p className="text-sm text-red-400 font-medium self-start">{error}</p>}
           <button
             type="submit"
-            className="w-full bg-[#1895C7] hover:bg-[#1279AE] active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer"
+            disabled={isLoading}
+            className="w-full bg-[#1895C7] hover:bg-[#1279AE] active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {t.admin.unlock}
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t.admin.unlock}
+              </>
+            ) : (
+              t.admin.unlock
+            )}
           </button>
         </form>
       </div>

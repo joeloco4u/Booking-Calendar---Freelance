@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import Layout, { type AdminSection } from './components/Layout'
 import Calendar from './components/Calendar'
 import ReservationForm from './components/ReservationForm'
@@ -9,7 +10,6 @@ import AdminUsers from './components/AdminUsers'
 import AdminSettings from './components/AdminSettings'
 import FacilityLanding from './components/FacilityLanding'
 import LandingPage from './components/LandingPage'
-import ViewToggle from './components/ViewToggle'
 import { fetchMonthData, type MonthDataRow } from './services/api'
 import { translations, type Lang } from './i18n'
 
@@ -26,10 +26,81 @@ const DEFAULT_RULES = [
   'Cancelaciones con menos de 1 semana de antelación aplican una penalización de $10 USD.',
 ]
 
-export default function App() {
-  const [siteView, setSiteView] = useState<'landing' | 'app'>('landing')
-  const [role, setRole] = useState<'freelancer' | 'admin'>('freelancer')
-  const [lang, setLang] = useState<Lang>('es')
+function BookingView(props: {
+  lang: Lang
+  selectedDate: number | null
+  selectedMonth: number | null
+  selectedYear: number | null
+  schedule: string
+  onScheduleChange: (s: string) => void
+  monthData: MonthDataRow[]
+  currentMonthStr: string
+  onRefresh: () => void
+  fee: number
+  viewDate: Date
+  onPrevMonth: () => void
+  onNextMonth: () => void
+  onSelectDate: (day: number, month: number, year: number) => void
+  isLoading: boolean
+}) {
+  const location = useLocation()
+  const bookingRef = useRef<HTMLElement | null>(null)
+
+  const {
+    lang, selectedDate, selectedMonth, selectedYear, schedule,
+    onScheduleChange, monthData, currentMonthStr, onRefresh, fee,
+    viewDate, onPrevMonth, onNextMonth, onSelectDate, isLoading,
+  } = props
+
+  useEffect(() => {
+    if (location.state?.scrollToBooking) {
+      window.history.replaceState({}, '')
+      setTimeout(() => {
+        bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 150)
+    }
+  }, [location.state])
+
+  return (
+    <>
+      <FacilityLanding lang={lang} />
+      <section
+        ref={bookingRef}
+        id="booking"
+        className="grid grid-cols-1 lg:grid-cols-2 items-stretch gap-6 scroll-mt-6"
+      >
+        <Calendar
+          viewDate={viewDate}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+          selectedDate={selectedDate}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onSelectDate={onSelectDate}
+          monthData={monthData}
+          isLoading={isLoading}
+          lang={lang}
+        />
+        <ReservationForm
+          selectedDate={selectedDate}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          schedule={schedule}
+          onScheduleChange={onScheduleChange}
+          monthData={monthData}
+          currentMonthStr={currentMonthStr}
+          onRefresh={onRefresh}
+          lang={lang}
+          fee={fee}
+        />
+      </section>
+    </>
+  )
+}
+
+function AppContent() {
+  const navigate = useNavigate()
+  const [lang, setLang] = useState<Lang>('en')
   const [adminSection, setAdminSection] = useState<AdminSection>('dashboard')
   const [adminAuthed, setAdminAuthed] = useState(false)
   const [fee, setFee] = useState(60)
@@ -113,23 +184,11 @@ export default function App() {
     setSchedule('')
   }
 
-  const isAdmin = role === 'admin'
   const t = translations[lang]
-  const config = isAdmin
-    ? { title: t.header.adminTitle, subtitle: t.header.adminSubtitle }
-    : { title: t.header.userTitle, subtitle: t.header.userSubtitle }
 
-  const bookingRef = useRef<HTMLElement | null>(null)
-  const handleBookNow = useCallback(() => {
-    if (siteView !== 'app') {
-      setSiteView('app')
-      setTimeout(() => {
-        bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 150)
-      return
-    }
-    bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [siteView])
+  const handleBookNow = () => {
+    navigate('/reservar', { state: { scrollToBooking: true } })
+  }
 
   const handleSelectDate = (day: number, month: number, year: number) => {
     setSelectedDate(day)
@@ -139,23 +198,58 @@ export default function App() {
   }
 
   return (
-    <>
-      {siteView === 'landing' ? (
-        <LandingPage lang={lang} onLangChange={setLang} onBookNow={handleBookNow} />
-      ) : (
-        <Layout
-          headerTitle={config.title}
-          headerSubtitle={config.subtitle}
-          role={role}
-          lang={lang}
-          activeSection={adminSection}
-          onNavigate={setAdminSection}
-          onLangChange={setLang}
-          onRoleChange={setRole}
-          onBookNow={handleBookNow}
-        >
-          {isAdmin ? (
-            !adminAuthed ? (
+    <Routes>
+      <Route
+        path="/"
+        element={<LandingPage lang={lang} onLangChange={setLang} onBookNow={handleBookNow} />}
+      />
+
+      <Route
+        path="/reservar"
+        element={
+          <Layout
+            headerTitle={t.header.userTitle}
+            headerSubtitle={t.header.userSubtitle}
+            role="freelancer"
+            lang={lang}
+            activeSection={null}
+            onNavigate={setAdminSection}
+            onLangChange={setLang}
+          >
+            <BookingView
+              lang={lang}
+              selectedDate={selectedDate}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              schedule={schedule}
+              onScheduleChange={setSchedule}
+              monthData={monthData}
+              currentMonthStr={currentMonthStr}
+              onRefresh={refreshData}
+              fee={fee}
+              viewDate={viewDate}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
+              onSelectDate={handleSelectDate}
+              isLoading={isLoading}
+            />
+          </Layout>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <Layout
+            headerTitle={t.header.adminTitle}
+            headerSubtitle={t.header.adminSubtitle}
+            role="admin"
+            lang={lang}
+            activeSection={adminSection}
+            onNavigate={setAdminSection}
+            onLangChange={setLang}
+          >
+            {!adminAuthed ? (
               <AdminDashboard
                 monthData={monthData}
                 onMonthDataChange={setMonthData}
@@ -215,45 +309,20 @@ export default function App() {
                 onRulesChange={setRules}
                 lang={lang}
               />
-            )
-          ) : (
-            <>
-              <FacilityLanding lang={lang} />
-              <section
-                ref={bookingRef}
-                id="booking"
-                className="grid grid-cols-1 lg:grid-cols-2 items-stretch gap-6 scroll-mt-6"
-              >
-                <Calendar
-                  viewDate={viewDate}
-                  onPrevMonth={handlePrevMonth}
-                  onNextMonth={handleNextMonth}
-                  selectedDate={selectedDate}
-                  selectedMonth={selectedMonth}
-                  selectedYear={selectedYear}
-                  onSelectDate={handleSelectDate}
-                  monthData={monthData}
-                  isLoading={isLoading}
-                  lang={lang}
-                />
-                <ReservationForm
-                  selectedDate={selectedDate}
-                  selectedMonth={selectedMonth}
-                  selectedYear={selectedYear}
-                  schedule={schedule}
-                  onScheduleChange={setSchedule}
-                  monthData={monthData}
-                  currentMonthStr={currentMonthStr}
-                  onRefresh={refreshData}
-                  lang={lang}
-                  fee={fee}
-                />
-              </section>
-            </>
-          )}
-        </Layout>
-      )}
-      <ViewToggle view={siteView} onChange={setSiteView} />
-    </>
+            )}
+          </Layout>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   )
 }

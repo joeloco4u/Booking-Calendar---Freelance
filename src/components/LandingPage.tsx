@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Waves,
   Check,
@@ -638,9 +639,14 @@ function LandingFooter({ lang }: { lang: Lang }) {
 }
 
 export default function LandingPage({ lang, onLangChange, onBookNow }: LandingPageProps) {
+  const navigate = useNavigate()
   return (
     <div className="bg-white text-navy min-h-screen antialiased scroll-smooth">
-      <LandingHeader lang={lang} onLangChange={onLangChange} onBookNow={onBookNow} />
+      <LandingHeader
+        lang={lang}
+        onLangChange={onLangChange}
+        onBookNow={() => navigate('/reservar', { state: { scrollToBooking: true } })}
+      />
       <main>
         <Hero lang={lang} onBookNow={onBookNow} />
         <Included lang={lang} />
