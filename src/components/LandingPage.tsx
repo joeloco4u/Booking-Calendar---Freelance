@@ -165,7 +165,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
         </div>
 
         <nav
-          className="hidden lg:flex items-center justify-center flex-1 gap-7 px-4"
+          className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 gap-7"
           onMouseLeave={clearHover}
         >
           {navItems.map((item, idx) => (
