@@ -171,7 +171,7 @@ export default function Header({
             </Link>
           ) : null}
 
-          <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/15">
+          <div className="hidden lg:flex items-center p-1 rounded-full bg-white/[0.06] border border-white/15">
             {(['es', 'en'] as const).map((code) => (
               <button
                 key={code}

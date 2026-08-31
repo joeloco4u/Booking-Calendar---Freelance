@@ -189,13 +189,13 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
           </div>
           <button
             onClick={onBookNow}
-            className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#1279AE] active:scale-95 transition-all cursor-pointer"
+            className="hidden lg:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#1279AE] active:scale-95 transition-all cursor-pointer"
           >
             {t.landing.heroCta}
           </button>
           <button
             onClick={() => setMenuOpen(true)}
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 mr-[-4px] rounded-lg text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors cursor-pointer"
             aria-label="Menu"
             aria-expanded={menuOpen}
           >
