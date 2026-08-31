@@ -16,7 +16,7 @@ import type { MonthDataRow } from '../services/api'
 import { getDayType, getAvailableSchedules } from '../utils/schedule'
 import { extractDay } from '../utils/date'
 import { translations, type Lang } from '../i18n'
-import poolThumb from '../images/IMG_5622-_1_.png'
+import poolThumb from '../images/IMG_5622-_1_.webp'
 
 interface ReservationFormProps {
   selectedDate: number | null

@@ -14,12 +14,12 @@ import {
   Home,
 } from 'lucide-react'
 import { translations, type Lang } from '../i18n'
-import poolA from '../images/IMG_5622-_1_.png'
-import poolB from '../images/IMG_5617.png'
-import poolC from '../images/IMG_5623.png'
-import poolD from '../images/IMG_8073.png'
+import poolA from '../images/IMG_5622-_1_.webp'
+import poolB from '../images/IMG_5617.webp'
+import poolC from '../images/IMG_5623.webp'
+import poolD from '../images/IMG_8073.webp'
 import poolE from '../images/d23868d7-a4d5-47c6-8e1e-3763c671d350.png'
-import poolF from '../images/IMG_5623-_1_.png'
+import poolF from '../images/IMG_5623-_1_.webp'
 
 interface LandingPageProps {
   lang: Lang
