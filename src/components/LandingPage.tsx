@@ -151,7 +151,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
       ref={headerRef}
       className="bg-navy-deep sticky top-0 z-40 border-b border-white/[0.06] relative"
     >
-      <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 md:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-5 md:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
           <img
             src="/FlatamLogo.png"
@@ -165,7 +165,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
         </div>
 
         <nav
-          className="hidden lg:flex items-center justify-self-center gap-7"
+          className="hidden lg:flex items-center justify-center flex-1 gap-7 px-4"
           onMouseLeave={clearHover}
         >
           {navItems.map((item, idx) => (
