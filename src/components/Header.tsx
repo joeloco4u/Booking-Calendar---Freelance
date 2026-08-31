@@ -174,9 +174,9 @@ export default function Header({
           {!isAdmin && (
             <button
               onClick={handleRoleChange}
-              className="hidden sm:inline-flex items-center gap-2 px-3 h-9 rounded-xl bg-white/[0.06] border border-white/15 text-sm font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer"
+              className="hidden sm:inline-flex min-w-[120px] items-center justify-center gap-2 px-4 h-9 rounded-xl bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white text-sm font-bold shadow-[0_4px_20px_-4px_rgba(32,177,238,0.6)] hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
-              <Shield className="w-4 h-4 text-[#20B1EE]" />
+              <Shield className="w-4 h-4" />
               {t.header.goToAdmin}
             </button>
           )}

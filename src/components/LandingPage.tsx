@@ -325,7 +325,7 @@ function Hero({ lang, onBookNow }: { lang: Lang; onBookNow: () => void }) {
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={onBookNow}
-            className="inline-flex items-center gap-2 px-8 h-13 py-3.5 rounded-full bg-[#0E2138] border border-[#1895C7] text-white text-base font-bold hover:bg-[#142A44] active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-8 h-14 py-3.5 rounded-full bg-gradient-to-r from-[#2baee6] to-[#1895c7] text-white text-base font-bold hover:brightness-105 active:scale-95 transition-all cursor-pointer"
           >
             {t.landing.heroCta} <ArrowRight className="w-4 h-4" />
           </button>
@@ -490,7 +490,7 @@ function Included({ lang }: { lang: Lang }) {
                     {card.tag}
                   </span>
                   <h3 className="mt-3 text-2xl md:text-3xl font-bold text-white leading-tight text-balance">
-                    {card.title} <span className="text-cyan-glow">{card.highlight}</span>
+                    {card.title} <span className="text-cyan-bright">{card.highlight}</span>
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-white/75 leading-relaxed">{card.desc}</p>
                 </div>
