@@ -187,7 +187,7 @@ function AppContent() {
   const t = translations[lang]
 
   const handleBookNow = () => {
-    navigate('/reservar', { state: { scrollToBooking: true } })
+    navigate('/booking', { state: { scrollToBooking: true } })
   }
 
   const handleSelectDate = (day: number, month: number, year: number) => {
@@ -205,7 +205,7 @@ function AppContent() {
       />
 
       <Route
-        path="/reservar"
+        path="/booking"
         element={
           <Layout
             headerTitle={t.header.userTitle}

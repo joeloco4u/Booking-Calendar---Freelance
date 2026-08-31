@@ -645,7 +645,7 @@ export default function LandingPage({ lang, onLangChange, onBookNow }: LandingPa
       <LandingHeader
         lang={lang}
         onLangChange={onLangChange}
-        onBookNow={() => navigate('/reservar', { state: { scrollToBooking: true } })}
+        onBookNow={() => navigate('/booking', { state: { scrollToBooking: true } })}
       />
       <main>
         <Hero lang={lang} onBookNow={onBookNow} />

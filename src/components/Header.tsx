@@ -56,7 +56,7 @@ export default function Header({
   }
 
   const handleRoleChange = () => {
-    navigate(isAdmin ? '/reservar' : '/admin')
+    navigate(isAdmin ? '/booking' : '/admin')
   }
 
   return (
@@ -106,7 +106,7 @@ export default function Header({
         )}
 
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          {location.pathname === '/reservar' ? (
+          {location.pathname === '/booking' ? (
             <Link
               to="/"
               className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-xl bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all cursor-pointer"
@@ -115,7 +115,7 @@ export default function Header({
             </Link>
           ) : location.pathname === '/' ? (
             <Link
-              to="/reservar"
+              to="/booking"
               state={{ scrollToBooking: true }}
               className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-xl bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white text-sm font-bold hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
