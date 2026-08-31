@@ -184,7 +184,9 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
         </nav>
 
         <div className="flex min-w-0 items-center justify-end gap-3">
-          <LanguageToggle lang={lang} onLangChange={onLangChange} />
+          <div className="hidden lg:block">
+            <LanguageToggle lang={lang} onLangChange={onLangChange} />
+          </div>
           <button
             onClick={onBookNow}
             className="hidden sm:inline-flex min-w-[140px] items-center justify-center gap-2 px-4 h-9 rounded-lg bg-[#1895C7] text-white text-sm font-bold hover:bg-[#1279AE] active:scale-95 transition-all cursor-pointer"
