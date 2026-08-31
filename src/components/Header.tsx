@@ -171,6 +171,16 @@ export default function Header({
             </Link>
           ) : null}
 
+          {!isAdmin && (
+            <button
+              onClick={handleRoleChange}
+              className="hidden sm:inline-flex items-center gap-2 px-3 h-9 rounded-xl bg-white/[0.06] border border-white/15 text-sm font-semibold text-white/80 hover:bg-white/[0.12] hover:text-white active:scale-95 transition-all cursor-pointer"
+            >
+              <Shield className="w-4 h-4 text-[#20B1EE]" />
+              {t.header.goToAdmin}
+            </button>
+          )}
+
           <div className="flex items-center gap-2 md:gap-3">
             <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/15">
               {(['es', 'en'] as const).map((code) => (

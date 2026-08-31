@@ -23,6 +23,7 @@ const es = {
     mobileSwitchToAdmin: 'Panel Admin',
     mobileSwitchToUser: 'Volver alInicio',
     mobileCloseMenu: 'Cerrar menú',
+    goToAdmin: 'Admin',
   },
   facility: {
     heroBadge: 'Área común · capacidad limitada',
@@ -328,6 +329,7 @@ function makeEn(): typeof es {
       mobileSwitchToAdmin: 'Admin Panel',
       mobileSwitchToUser: 'Back to Home',
       mobileCloseMenu: 'Close menu',
+      goToAdmin: 'Admin',
     },
     facility: {
       heroBadge: 'Common area · Limited capacity',
