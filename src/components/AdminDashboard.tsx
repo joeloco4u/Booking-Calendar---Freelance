@@ -56,7 +56,7 @@ export default function AdminDashboard({
         setPassword('')
         onAuthed()
       } else {
-        setError(res.error || t.admin.pinError)
+        setError(lang === 'en' ? 'Incorrect password' : 'Contraseña incorrecta')
         setPassword('')
       }
     } catch {
