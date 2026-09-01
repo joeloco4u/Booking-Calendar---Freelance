@@ -476,7 +476,7 @@ export default function ReservationForm({
                     <span className={`block text-sm font-bold ${active ? 'text-[#0F172A]' : 'text-white'}`}>
                       {opt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight}
                       {occupied && (
-                        <span className="text-xs font-medium text-red-400/80 ml-1">(Ocupado)</span>
+                        <span className="text-xs font-medium text-red-400/80 ml-1">({t.calendar.titleOccupied})</span>
                       )}
                     </span>
                     <span className={`block text-xs ${active ? 'text-[#0F172A]/70' : 'text-white/75'}`}>

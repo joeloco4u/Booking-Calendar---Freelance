@@ -21,7 +21,7 @@ const es = {
     mobileNavRules: 'Reglas',
     mobileNavFaq: 'Preguntas',
     mobileSwitchToAdmin: 'Panel Admin',
-    mobileSwitchToUser: 'Volver alInicio',
+    mobileSwitchToUser: 'Volver al Inicio',
     mobileCloseMenu: 'Cerrar menú',
     goToAdmin: 'Admin',
   },
