@@ -14,14 +14,13 @@ export interface MonthDataRow {
 }
 
 export async function fetchMonthData(mes: string): Promise<MonthDataRow[]> {
-  try {
-    const response = await fetch(`${GAS_URL}?mes=${encodeURIComponent(mes)}`)
-    const json = await response.json()
-    return Array.isArray(json.data) ? json.data : []
-  } catch (error) {
-    console.error('Fetch error:', error)
-    return []
+  const response = await fetch(`${GAS_URL}?mes=${encodeURIComponent(mes)}`)
+  if (!response.ok) throw new Error(`GET failed: ${response.status}`)
+  const json = await response.json()
+  if (!Array.isArray(json.data)) {
+    throw new Error('Unexpected response from server')
   }
+  return json.data
 }
 
 export async function submitBooking(payload: {

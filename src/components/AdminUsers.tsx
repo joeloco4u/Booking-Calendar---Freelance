@@ -7,6 +7,7 @@ interface AdminUsersProps {
   monthData: MonthDataRow[]
   lang: Lang
   fee: number
+  isLoading?: boolean
 }
 
 interface ClientAgg {
@@ -24,7 +25,7 @@ const STATUS_DOT: Record<string, string> = {
   rejected: 'bg-red-400',
 }
 
-export default function AdminUsers({ monthData, lang, fee }: AdminUsersProps) {
+export default function AdminUsers({ monthData, lang, fee, isLoading = false }: AdminUsersProps) {
   const t = translations[lang]
   const [query, setQuery] = useState('')
 
@@ -88,9 +89,13 @@ export default function AdminUsers({ monthData, lang, fee }: AdminUsersProps) {
             className="rounded-[20px] bg-[#0B1F35]/80 border border-white/[0.08] p-6 hover:border-[#20B1EE]/30 hover:-translate-y-0.5 transition-all duration-300 shadow-[0_24px_48px_-28px_rgba(0,0,0,0.9)]"
           >
             <p className="text-[0.8rem] font-medium text-[#7A93B5]">{card.label}</p>
-            <p className="mt-2 text-[1.8rem] font-bold text-white tabular-nums leading-none">
-              {card.value}
-            </p>
+            {isLoading ? (
+              <div className="mt-2 h-8 w-16 animate-pulse rounded-md bg-white/10" />
+            ) : (
+              <p className="mt-2 text-[1.8rem] font-bold text-white tabular-nums leading-none">
+                {card.value}
+              </p>
+            )}
             <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[11px] font-semibold text-white/60">
               <span className={`w-1.5 h-1.5 rounded-full ${card.dot}`} />
               {card.label}
@@ -119,7 +124,22 @@ export default function AdminUsers({ monthData, lang, fee }: AdminUsersProps) {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="mt-6 space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-[#102A43]/60 border border-white/[0.06] animate-pulse"
+              >
+                <div className="w-10 h-10 rounded-full bg-white/10" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-3 w-32 rounded bg-white/10" />
+                  <div className="h-2.5 w-24 rounded bg-white/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-[20px] border border-dashed border-white/[0.1]">
             <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
               <UsersIcon className="w-6 h-6 text-[#20B1EE]" />

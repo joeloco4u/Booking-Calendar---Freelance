@@ -16,6 +16,7 @@ interface AdminCalendarProps {
   onRefresh: () => void
   lang: Lang
   fee?: number
+  isLoading?: boolean
 }
 
 const STATUS_PILL: Record<string, { pill: string; dot: string }> = {
@@ -47,6 +48,7 @@ export default function AdminCalendar({
   onRefresh,
   lang,
   fee = 60,
+  isLoading = false,
 }: AdminCalendarProps) {
   const t = translations[lang]
   const [selected, setSelected] = useState<{ day: number; month: number; year: number } | null>(
@@ -150,7 +152,25 @@ export default function AdminCalendar({
           </h2>
 
           <div className="mt-5 space-y-3">
-            {activeSelection && dayRows.length === 0 && (
+            {isLoading && (
+              <div className="space-y-3">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl bg-[#102A43]/60 border border-white/[0.06] p-4 animate-pulse"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/10" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 w-32 rounded bg-white/10" />
+                        <div className="h-2.5 w-20 rounded bg-white/5" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!isLoading && activeSelection && dayRows.length === 0 && (
               <div className="flex flex-col items-center justify-center py-14 text-center rounded-[20px] border border-dashed border-white/[0.1]">
                 <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
                   <CalendarDay className="w-6 h-6 text-[#20B1EE]" />
@@ -158,7 +178,8 @@ export default function AdminCalendar({
                 <p className="mt-4 text-sm text-[#7A93B5]">{t.admin.calendarDayEmpty}</p>
               </div>
             )}
-            {activeSelection &&
+            {!isLoading &&
+              activeSelection &&
               dayRows.map((row) => {
                 const status = row.status?.toLowerCase() ?? 'available'
                 const badge = STATUS_PILL[status] ?? STATUS_PILL.available
@@ -217,7 +238,7 @@ export default function AdminCalendar({
                   </div>
                 )
               })}
-            {!activeSelection && (
+            {!isLoading && !activeSelection && (
               <div className="flex flex-col items-center justify-center py-14 text-center rounded-[20px] border border-dashed border-white/[0.1]">
                 <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
                   <CalendarDay className="w-6 h-6 text-[#20B1EE]" />

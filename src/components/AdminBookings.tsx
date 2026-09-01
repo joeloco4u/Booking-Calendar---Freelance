@@ -13,6 +13,7 @@ interface AdminBookingsProps {
   lang: Lang
   rules: string[]
   fee?: number
+  isLoading?: boolean
 }
 
 const STATUS_BADGE: Record<string, { pill: string; dot: string }> = {
@@ -42,6 +43,7 @@ export default function AdminBookings({
   lang,
   rules,
   fee = 60,
+  isLoading = false,
 }: AdminBookingsProps) {
   const t = translations[lang]
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending')
@@ -167,7 +169,12 @@ export default function AdminBookings({
               activeTab === tab.key ? 'text-white' : 'text-[#94A3B8] hover:text-white'
             }`}
           >
-            {tab.label} ({tab.count})
+            {tab.label}{' '}
+            {isLoading ? (
+              <span className="inline-block h-4 w-6 animate-pulse rounded bg-white/10 align-middle" />
+            ) : (
+              `(${tab.count})`
+            )}
             {activeTab === tab.key && (
               <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#20B1EE]" />
             )}
@@ -188,7 +195,24 @@ export default function AdminBookings({
       </div>
 
       <div className="mt-2 space-y-2">
-        {displayData.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="grid grid-cols-1 gap-y-2 gap-x-6 px-4 sm:px-5 py-4 rounded-lg bg-white/[0.02] border-b border-white/[0.06] animate-pulse"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-white/10" />
+                  <div className="space-y-2">
+                    <div className="h-3 w-32 rounded bg-white/10" />
+                    <div className="h-2.5 w-24 rounded bg-white/5" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : displayData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-lg border border-dashed border-white/[0.1]">
             <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
               <Calendar className="w-6 h-6 text-[#20B1EE]" />

@@ -59,6 +59,10 @@ const es = {
     ctaSub: 'Elige un turno de fin de semana y confirma tu solicitud en menos de un minuto.',
     cta: 'Ver disponibilidad y reservar',
   },
+  errors: {
+    server: 'Error al conectar con el servidor. Intenta actualizar la página.',
+    retry: 'Reintentar',
+  },
   calendar: {
     weekdays: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
     months: [
@@ -365,6 +369,10 @@ function makeEn(): typeof es {
       ctaTitle: 'Ready to book?',
       ctaSub: 'Pick a weekend slot and confirm your request in under a minute.',
       cta: 'Check Availability & Book',
+    },
+    errors: {
+      server: 'Error connecting to the server. Please try refreshing.',
+      retry: 'Retry',
     },
     calendar: {
       weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
