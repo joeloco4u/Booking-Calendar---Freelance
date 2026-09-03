@@ -188,6 +188,18 @@ export default function ReservationForm({
     return row ? row.status !== 'Available' : false
   }
 
+  const isSlotMaintenance = (scheduleValue: string) => {
+    if (selectedDate === null) return false
+    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '')
+    const row = safeData.find(
+      (r) =>
+        r.schedule &&
+        extractDay(r.date) === selectedDate &&
+        normalize(r.schedule) === normalize(scheduleValue),
+    )
+    return row ? row.status === 'Maintenance' : false
+  }
+
   useEffect(() => {
     if (schedule && selectedDate !== null) {
       const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '')
@@ -457,6 +469,7 @@ export default function ReservationForm({
             {availableSchedules.map((opt) => {
               const active = schedule === opt.value
               const occupied = isSlotOccupied(opt.value)
+              const maintenance = isSlotMaintenance(opt.value)
               return (
                 <button
                   key={opt.value}
@@ -476,7 +489,9 @@ export default function ReservationForm({
                     <span className={`block text-sm font-bold ${active ? 'text-[#0F172A]' : 'text-white'}`}>
                       {opt.value === '9 am a 6 pm' ? t.booking.turnDay : t.booking.turnNight}
                       {occupied && (
-                        <span className="text-xs font-medium text-red-400/80 ml-1">(Ocupado)</span>
+                        <span className="text-xs font-medium text-red-400/80 ml-1">
+                          ({maintenance ? t.admin.maintenance : t.calendar.titleOccupied})
+                        </span>
                       )}
                     </span>
                     <span className={`block text-xs ${active ? 'text-[#0F172A]/70' : 'text-white/75'}`}>

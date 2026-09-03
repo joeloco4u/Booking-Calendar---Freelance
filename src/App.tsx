@@ -10,6 +10,7 @@ import AdminUsers from './components/AdminUsers'
 import AdminSettings from './components/AdminSettings'
 import FacilityLanding from './components/FacilityLanding'
 import LandingPage from './components/LandingPage'
+import ErrorBanner from './components/ErrorBanner'
 import { fetchMonthData, type MonthDataRow } from './services/api'
 import { translations, type Lang } from './i18n'
 
@@ -42,6 +43,7 @@ function BookingView(props: {
   onNextMonth: () => void
   onSelectDate: (day: number, month: number, year: number) => void
   isLoading: boolean
+  error: boolean
 }) {
   const location = useLocation()
   const bookingRef = useRef<HTMLElement | null>(null)
@@ -49,7 +51,7 @@ function BookingView(props: {
   const {
     lang, selectedDate, selectedMonth, selectedYear, schedule,
     onScheduleChange, monthData, currentMonthStr, onRefresh, fee,
-    viewDate, onPrevMonth, onNextMonth, onSelectDate, isLoading,
+    viewDate, onPrevMonth, onNextMonth, onSelectDate, isLoading, error,
   } = props
 
   useEffect(() => {
@@ -63,6 +65,9 @@ function BookingView(props: {
 
   return (
     <>
+      {error && (
+        <ErrorBanner lang={lang} />
+      )}
       <FacilityLanding lang={lang} />
       <section
         ref={bookingRef}
@@ -98,6 +103,18 @@ function BookingView(props: {
   )
 }
 
+function RouteWatcher({ onLeaveAdmin }: { onLeaveAdmin: () => void }) {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!location.pathname.startsWith('/admin')) {
+      onLeaveAdmin()
+    }
+  }, [location.pathname, onLeaveAdmin])
+
+  return null
+}
+
 function AppContent() {
   const navigate = useNavigate()
   const [lang, setLang] = useState<Lang>('en')
@@ -112,34 +129,43 @@ function AppContent() {
   const [viewDate, setViewDate] = useState(() => new Date())
   const [monthData, setMonthData] = useState<MonthDataRow[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [cache, setCache] = useState<Record<string, MonthDataRow[]>>({})
+  const cacheRef = useRef(cache)
+  useEffect(() => {
+    cacheRef.current = cache
+  }, [cache])
 
   const currentMonthStr = `${MONTH_NAMES_ES[viewDate.getMonth()]} - ${viewDate.getFullYear()}`
 
   const refreshData = useCallback(() => {
     setIsLoading(true)
+    setError(false)
     fetchMonthData(currentMonthStr)
       .then((data) => {
         setMonthData(data)
         setCache((prev) => ({ ...prev, [currentMonthStr]: data }))
-        setIsLoading(false)
       })
       .catch(() => {
         setMonthData([])
-        setIsLoading(false)
+        setError(true)
       })
+      .finally(() => setIsLoading(false))
   }, [currentMonthStr])
 
   useEffect(() => {
     let isMounted = true
+    const cached = cacheRef.current[currentMonthStr]
 
-    if (cache[currentMonthStr]) {
-      setMonthData(cache[currentMonthStr])
+    if (cached) {
+      setMonthData(cached)
       setIsLoading(false)
-      return
+      setError(false)
+      return () => { isMounted = false }
     }
 
     setIsLoading(true)
+    setError(false)
     setMonthData([])
 
     fetchMonthData(currentMonthStr)
@@ -147,14 +173,16 @@ function AppContent() {
         if (isMounted) {
           setMonthData(data)
           setCache((prev) => ({ ...prev, [currentMonthStr]: data }))
-          setIsLoading(false)
         }
       })
       .catch(() => {
         if (isMounted) {
           setMonthData([])
-          setIsLoading(false)
+          setError(true)
         }
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false)
       })
 
     return () => { isMounted = false }
@@ -198,7 +226,9 @@ function AppContent() {
   }
 
   return (
-    <Routes>
+    <>
+      <RouteWatcher onLeaveAdmin={() => setAdminAuthed(false)} />
+      <Routes>
       <Route
         path="/"
         element={<LandingPage lang={lang} onLangChange={setLang} onBookNow={handleBookNow} />}
@@ -232,6 +262,7 @@ function AppContent() {
               onNextMonth={handleNextMonth}
               onSelectDate={handleSelectDate}
               isLoading={isLoading}
+              error={error}
             />
           </Layout>
         }
@@ -249,6 +280,7 @@ function AppContent() {
             onNavigate={setAdminSection}
             onLangChange={setLang}
           >
+            {error && <ErrorBanner lang={lang} onRetry={refreshData} />}
             {!adminAuthed ? (
               <AdminDashboard
                 monthData={monthData}
@@ -262,6 +294,7 @@ function AppContent() {
                 onAuthed={() => setAdminAuthed(true)}
                 fee={fee}
                 rules={rules}
+                isLoading={isLoading}
               />
             ) : adminSection === 'dashboard' ? (
               <AdminDashboard
@@ -276,6 +309,7 @@ function AppContent() {
                 onAuthed={() => setAdminAuthed(true)}
                 fee={fee}
                 rules={rules}
+                isLoading={isLoading}
               />
             ) : adminSection === 'bookings' ? (
               <AdminBookings
@@ -286,6 +320,7 @@ function AppContent() {
                 lang={lang}
                 rules={rules}
                 fee={fee}
+                isLoading={isLoading}
               />
             ) : adminSection === 'calendar' ? (
               <AdminCalendar
@@ -298,9 +333,10 @@ function AppContent() {
                 onRefresh={refreshData}
                 lang={lang}
                 fee={fee}
+                isLoading={isLoading}
               />
             ) : adminSection === 'users' ? (
-              <AdminUsers monthData={monthData} lang={lang} fee={fee} />
+              <AdminUsers monthData={monthData} lang={lang} fee={fee} isLoading={isLoading} />
             ) : (
               <AdminSettings
                 fee={fee}
@@ -316,6 +352,7 @@ function AppContent() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
 

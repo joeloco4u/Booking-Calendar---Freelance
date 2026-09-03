@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, X, Lock, LockOpen } from 'lucide-react'
 import Calendar from './Calendar'
-import { approveBooking, rejectBooking } from '../services/api'
+import { approveBooking, rejectBooking, lockDay, unlockDay } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { extractDay } from '../utils/date'
 import { translations, type Lang } from '../i18n'
@@ -16,6 +16,7 @@ interface AdminCalendarProps {
   onRefresh: () => void
   lang: Lang
   fee?: number
+  isLoading?: boolean
 }
 
 const STATUS_PILL: Record<string, { pill: string; dot: string }> = {
@@ -30,6 +31,10 @@ const STATUS_PILL: Record<string, { pill: string; dot: string }> = {
   rejected: {
     pill: 'bg-red-400/10 text-red-300 border-red-400/25',
     dot: 'bg-red-400',
+  },
+  maintenance: {
+    pill: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
+    dot: 'bg-amber-400',
   },
   available: {
     pill: 'bg-white/[0.06] text-slate-300 border-white/10',
@@ -47,12 +52,16 @@ export default function AdminCalendar({
   onRefresh,
   lang,
   fee = 60,
+  isLoading = false,
 }: AdminCalendarProps) {
   const t = translations[lang]
   const [selected, setSelected] = useState<{ day: number; month: number; year: number } | null>(
     null,
   )
   const [actionLoading, setActionLoading] = useState<number | null>(null)
+  const [lockLoading, setLockLoading] = useState(false)
+  const [confirmLock, setConfirmLock] = useState(false)
+  const [lockTarget, setLockTarget] = useState<string>('both')
 
   const activeSelection =
     selected &&
@@ -63,11 +72,83 @@ export default function AdminCalendar({
 
   const handleSelectDate = (day: number, month: number, year: number) => {
     setSelected({ day, month, year })
+    setConfirmLock(false)
+    setLockTarget('both')
   }
 
   const dayRows = activeSelection
     ? monthData.filter((r) => extractDay(r.date) === activeSelection.day)
     : []
+
+  const targetRows = lockTarget === 'both' ? dayRows : dayRows.filter((r) => r.schedule === lockTarget)
+
+  const dayLocked =
+    activeSelection !== null &&
+    targetRows.length > 0 &&
+    targetRows.every((r) => r.status === 'Maintenance')
+
+  const conflictingRows =
+    activeSelection !== null
+      ? targetRows.filter((r) => r.status === 'Pending' || r.status === 'Approved')
+      : []
+
+  const selectedDateStr = activeSelection
+    ? `${activeSelection.year}-${String(activeSelection.month + 1).padStart(2, '0')}-${String(
+        activeSelection.day,
+      ).padStart(2, '0')}`
+    : ''
+
+  const handleLock = async () => {
+    if (!activeSelection || lockLoading) return
+    if (conflictingRows.length > 0 && !confirmLock) {
+      setConfirmLock(true)
+      return
+    }
+    setLockLoading(true)
+    setConfirmLock(false)
+    try {
+      const res = await lockDay(
+        currentMonthStr,
+        selectedDateStr,
+        conflictingRows.length > 0,
+        lockTarget === 'both' ? undefined : lockTarget,
+      )
+      if (!res.success) {
+        if (res.conflicts) {
+          setConfirmLock(true)
+          return
+        }
+        window.alert(`Backend error: ${res.error ?? 'Unknown error'}`)
+        return
+      }
+      onRefresh()
+    } catch {
+      onRefresh()
+    } finally {
+      setLockLoading(false)
+    }
+  }
+
+  const handleUnlock = async () => {
+    if (!activeSelection || lockLoading) return
+    setLockLoading(true)
+    try {
+      const res = await unlockDay(
+        currentMonthStr,
+        selectedDateStr,
+        lockTarget === 'both' ? undefined : lockTarget,
+      )
+      if (!res.success) {
+        window.alert(`Backend error: ${res.error ?? 'Unknown error'}`)
+        return
+      }
+      onRefresh()
+    } catch {
+      onRefresh()
+    } finally {
+      setLockLoading(false)
+    }
+  }
 
   const handleApprove = async (row: MonthDataRow) => {
     if (actionLoading !== null) return
@@ -107,6 +188,8 @@ export default function AdminCalendar({
         return t.admin.approved
       case 'rejected':
         return t.admin.rejected
+      case 'maintenance':
+        return t.admin.maintenance
       default:
         return status
     }
@@ -149,8 +232,102 @@ export default function AdminCalendar({
             {activeSelection ? `${t.admin.calendarDayLabel}: ${selectedLabel}` : t.admin.calendarSelectHint}
           </h2>
 
+          {activeSelection && (
+            <div className="mt-4 rounded-2xl bg-[#102A43]/60 border border-dashed border-amber-400/30 p-4 animate-fade-in">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white">
+                    {dayLocked ? t.admin.lockLockedLabel : t.admin.lockDay}
+                  </p>
+                  <p className="text-xs text-[#7A93B5] mt-0.5">
+                    {dayLocked ? t.admin.lockUnlockedLabel : t.admin.lockDayHint}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {dayRows.length > 1 && (
+                    <select
+                      value={lockTarget}
+                      onChange={(e) => setLockTarget(e.target.value)}
+                      className="h-9 rounded-xl bg-[#0B1F35]/80 border border-white/10 text-xs font-semibold text-white px-2.5 focus:outline-none focus:ring-2 focus:ring-[#1895C7]/60"
+                    >
+                      <option value="both">{t.admin.lockTargetBoth}</option>
+                      {dayRows.map((r) => (
+                        <option key={r.rowIndex} value={r.schedule}>
+                          {r.schedule}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {dayLocked ? (
+                    <button
+                      onClick={handleUnlock}
+                      disabled={lockLoading}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[0.8rem] font-bold bg-transparent border border-amber-400/40 text-amber-300 hover:bg-amber-400/10 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {lockLoading ? (
+                        t.admin.lockActionLoading
+                      ) : (
+                        <>
+                          <LockOpen className="w-3.5 h-3.5" />
+                          {t.admin.unlockDay}
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleLock}
+                      disabled={lockLoading}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[0.8rem] font-bold active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                        confirmLock
+                          ? 'bg-transparent border border-red-400/40 text-red-400 hover:bg-red-400/10'
+                          : 'bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white hover:brightness-110'
+                      }`}
+                    >
+                      {lockLoading ? (
+                        t.admin.lockActionLoading
+                      ) : (
+                        <>
+                          <Lock className="w-3.5 h-3.5" />
+                          {confirmLock && conflictingRows.length > 0
+                            ? t.admin.lockDayConfirm
+                            : t.admin.lockDay}
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+              {!dayLocked && confirmLock && conflictingRows.length > 0 && (
+                <div className="mt-3 flex items-start gap-2 rounded-xl bg-red-400/10 border border-red-400/25 p-3">
+                  <X className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-300 leading-relaxed">
+                    {t.admin.lockConflictWarning} ({conflictingRows.length})
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-5 space-y-3">
-            {activeSelection && dayRows.length === 0 && (
+            {isLoading && (
+              <div className="space-y-3">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl bg-[#102A43]/60 border border-white/[0.06] p-4 animate-pulse"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/10" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 w-32 rounded bg-white/10" />
+                        <div className="h-2.5 w-20 rounded bg-white/5" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!isLoading && activeSelection && dayRows.length === 0 && (
               <div className="flex flex-col items-center justify-center py-14 text-center rounded-[20px] border border-dashed border-white/[0.1]">
                 <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
                   <CalendarDay className="w-6 h-6 text-[#20B1EE]" />
@@ -158,7 +335,8 @@ export default function AdminCalendar({
                 <p className="mt-4 text-sm text-[#7A93B5]">{t.admin.calendarDayEmpty}</p>
               </div>
             )}
-            {activeSelection &&
+            {!isLoading &&
+              activeSelection &&
               dayRows.map((row) => {
                 const status = row.status?.toLowerCase() ?? 'available'
                 const badge = STATUS_PILL[status] ?? STATUS_PILL.available
@@ -169,10 +347,16 @@ export default function AdminCalendar({
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#20B1EE]/15 border border-[#20B1EE]/25 flex items-center justify-center text-xs font-bold text-[#20B1EE] shrink-0">
-                        {row.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        {status === 'maintenance'
+                          ? 'M'
+                          : row.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-white truncate">{row.name}</p>
+                        <p className="text-sm font-bold text-white truncate">
+                          {status === 'maintenance'
+                            ? t.admin.maintenance.toUpperCase()
+                            : row.name}
+                        </p>
                         <p className="text-xs text-[#64748B] truncate">{row.schedule}</p>
                       </div>
                       <span
@@ -186,7 +370,9 @@ export default function AdminCalendar({
                       <p className="mt-2 text-xs text-[#64748B]">{row.email}</p>
                     )}
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-white tabular-nums">${row.fee > 0 ? row.fee : fee}.00</p>
+                      <p className="text-sm font-bold text-white tabular-nums">
+                        {status === 'maintenance' ? '—' : `$${row.fee > 0 ? row.fee : fee}.00`}
+                      </p>
                       {status === 'pending' && (
                         <div className="flex items-center gap-2">
                           <button
@@ -217,7 +403,7 @@ export default function AdminCalendar({
                   </div>
                 )
               })}
-            {!activeSelection && (
+            {!isLoading && !activeSelection && (
               <div className="flex flex-col items-center justify-center py-14 text-center rounded-[20px] border border-dashed border-white/[0.1]">
                 <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
                   <CalendarDay className="w-6 h-6 text-[#20B1EE]" />

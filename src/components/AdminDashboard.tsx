@@ -17,6 +17,7 @@ interface AdminDashboardProps {
   onAuthed: () => void
   fee: number
   rules: string[]
+  isLoading?: boolean
 }
 
 export default function AdminDashboard({
@@ -31,10 +32,11 @@ export default function AdminDashboard({
   onAuthed,
   fee,
   rules,
+  isLoading = false,
 }: AdminDashboardProps) {
   const t = translations[lang]
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [authLoading, setAuthLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handlePrevMonth = () => {
@@ -47,8 +49,8 @@ export default function AdminDashboard({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!password || isLoading) return
-    setIsLoading(true)
+    if (!password || authLoading) return
+    setAuthLoading(true)
     setError('')
     try {
       const res = await verifyAdminPassword(password)
@@ -56,13 +58,13 @@ export default function AdminDashboard({
         setPassword('')
         onAuthed()
       } else {
-        setError(res.error || t.admin.pinError)
+        setError(lang === 'en' ? 'Incorrect password' : 'Contraseña incorrecta')
         setPassword('')
       }
     } catch {
       setError(t.admin.pinError)
     } finally {
-      setIsLoading(false)
+      setAuthLoading(false)
     }
   }
 
@@ -88,10 +90,10 @@ export default function AdminDashboard({
           {error && <p className="text-sm text-red-400 font-medium self-start">{error}</p>}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={authLoading}
             className="w-full bg-[#1895C7] hover:bg-[#1279AE] active:scale-95 text-white py-2.5 rounded-xl font-bold transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {isLoading ? (
+            {authLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 {t.admin.unlock}
@@ -184,9 +186,13 @@ export default function AdminDashboard({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[0.8rem] font-medium text-[#7A93B5]">{card.label}</p>
-                  <p className="mt-2 text-[1.8rem] font-bold text-white tabular-nums leading-none">
-                    {card.value}
-                  </p>
+                  {isLoading ? (
+                    <div className="mt-2 h-8 w-16 animate-pulse rounded-md bg-white/10" />
+                  ) : (
+                    <p className="mt-2 text-[1.8rem] font-bold text-white tabular-nums leading-none">
+                      {card.value}
+                    </p>
+                  )}
                 </div>
                 <div
                   className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${card.iconWrap}`}
@@ -214,6 +220,7 @@ export default function AdminDashboard({
           lang={lang}
           rules={rules}
           fee={fee}
+          isLoading={isLoading}
         />
       </div>
     </div>

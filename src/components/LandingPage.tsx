@@ -257,7 +257,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
               <button
                 onClick={() => setMenuOpen(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white transition-all cursor-pointer"
-                aria-label="Cerrar menú"
+                aria-label={t.header.mobileCloseMenu}
               >
                 <X className="w-4 h-4" />
               </button>
