@@ -48,14 +48,20 @@ export default function Calendar({
       byDay.set(day, list)
     }
 
-    const statuses = new Map<number, 'occupied' | 'partial' | 'available'>()
+    const statuses = new Map<
+      number,
+      'occupied' | 'partial' | 'available' | 'locked'
+    >()
     for (const [day, rows] of byDay) {
       if (rows.length === 0) continue
       const allAvailable = rows.every((r) => r.status === 'Available')
-      const allOccupied = rows.every((r) => r.status === 'Approved' || r.status === 'Pending')
-      if (allAvailable) {
+      const allMaintenance = rows.every((r) => r.status === 'Maintenance')
+      const noneAvailable = rows.every((r) => r.status !== 'Available')
+      if (allMaintenance) {
+        statuses.set(day, 'locked')
+      } else if (allAvailable) {
         statuses.set(day, 'available')
-      } else if (allOccupied) {
+      } else if (noneAvailable) {
         statuses.set(day, 'occupied')
       } else {
         statuses.set(day, 'partial')
@@ -104,10 +110,10 @@ export default function Calendar({
     if (admin) return false
     if (isWeekday(day) || isPast(day)) return true
     const status = dayStatuses.get(day)
-    return status === 'occupied'
+    return status === 'occupied' || status === 'locked'
   }
 
-  const dayClass = (day: number, status: 'occupied' | 'partial' | 'available' | null) => {
+  const dayClass = (day: number, status: 'occupied' | 'partial' | 'available' | 'locked' | null) => {
     if (admin) {
       if (isSelected(day)) {
         return 'bg-[#20B1EE] text-white font-bold ring-1 ring-[#20B1EE]/40 shadow-[0_10px_24px_-12px_rgba(32,177,238,0.55)]'
@@ -132,10 +138,11 @@ export default function Calendar({
     return 'text-white font-semibold hover:scale-110 hover:ring-2 hover:ring-white/50 hover:bg-white/[0.1] transition-all duration-200'
   }
 
-  const dotClass = (status: 'occupied' | 'partial' | 'available' | null) => {
+  const dotClass = (status: 'occupied' | 'partial' | 'available' | 'locked' | null) => {
     if (status === 'available') return 'bg-[#10B981]'
     if (status === 'occupied') return 'bg-red-400'
     if (status === 'partial') return 'bg-amber-400'
+    if (status === 'locked') return 'bg-amber-400'
     return ''
   }
 
@@ -187,6 +194,7 @@ export default function Calendar({
 
           let title = ''
           if (isWeekday(day)) title = t.calendar.titleWeekday
+          else if (status === 'locked') title = t.calendar.titleMaintenance
           else if (status === 'occupied') title = t.calendar.titleOccupied
           else if (status === 'partial') title = t.calendar.titlePartial
           else if (status === 'available') title = t.calendar.titleAvailable
@@ -219,6 +227,9 @@ export default function Calendar({
         </span>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/70">
           <span className="w-2 h-2 rounded-full bg-amber-400" /> {t.calendar.legendPartial}
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-amber-400/25 text-xs text-amber-200">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" /> {t.calendar.legendMaintenance}
         </span>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/70">
           <span className="w-2 h-2 rounded-full bg-red-400" /> {t.calendar.legendOccupied}

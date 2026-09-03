@@ -103,6 +103,18 @@ function BookingView(props: {
   )
 }
 
+function RouteWatcher({ onLeaveAdmin }: { onLeaveAdmin: () => void }) {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!location.pathname.startsWith('/admin')) {
+      onLeaveAdmin()
+    }
+  }, [location.pathname, onLeaveAdmin])
+
+  return null
+}
+
 function AppContent() {
   const navigate = useNavigate()
   const [lang, setLang] = useState<Lang>('en')
@@ -214,7 +226,9 @@ function AppContent() {
   }
 
   return (
-    <Routes>
+    <>
+      <RouteWatcher onLeaveAdmin={() => setAdminAuthed(false)} />
+      <Routes>
       <Route
         path="/"
         element={<LandingPage lang={lang} onLangChange={setLang} onBookNow={handleBookNow} />}
@@ -338,6 +352,7 @@ function AppContent() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
 

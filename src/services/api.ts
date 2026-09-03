@@ -1,6 +1,6 @@
 const GAS_URL =
   import.meta.env.VITE_GAS_URL ??
-  'https://script.google.com/macros/s/AKfycby7UIi-i6zkSOS0MZaU_ME3cGKOBl3IVXKSB9GZJsm3M4JEBIIE_I7GO98Xt8oIMLQatw/exec'
+  'https://script.google.com/macros/s/AKfycbzLYyQJHcILyjgpseXoPIXqhX6kgeFQPfeUll6YpdWH3fM25tNMhEOtBexXYjSux21BpQ/exec'
 
 export interface MonthDataRow {
   rowIndex: number
@@ -10,7 +10,7 @@ export interface MonthDataRow {
   schedule: string
   fee: number
   note: string
-  status: 'Available' | 'Pending' | 'Approved' | 'Rejected'
+  status: 'Available' | 'Pending' | 'Approved' | 'Rejected' | 'Maintenance'
 }
 
 export async function fetchMonthData(mes: string): Promise<MonthDataRow[]> {
@@ -83,6 +83,39 @@ export async function cancelBooking(
   const res = await fetch(GAS_URL, {
     method: 'POST',
     body: JSON.stringify({ action: 'cancel', row, mes }),
+  })
+  if (!res.ok) throw new Error(`POST failed: ${res.status}`)
+  return res.json()
+}
+
+export async function lockDay(
+  mes: string,
+  date: string,
+  force?: boolean,
+  schedule?: string
+): Promise<{
+  success: boolean
+  message: string
+  conflicts?: boolean
+  rows?: number[]
+  error?: string
+}> {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'lock', mes, date, force: !!force, schedule }),
+  })
+  if (!res.ok) throw new Error(`POST failed: ${res.status}`)
+  return res.json()
+}
+
+export async function unlockDay(
+  mes: string,
+  date: string,
+  schedule?: string
+): Promise<{ success: boolean; message: string; rows?: number[]; error?: string }> {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'unlock', mes, date, schedule }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
