@@ -205,10 +205,10 @@ export default function AdminCalendar({
   return (
     <div className="mx-auto w-full max-w-[1400px] py-2 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
           {t.admin.pageCalendarTitle}
         </h1>
-        <p className="mt-2 text-sm text-[#7A93B5]">{t.admin.pageCalendarSub}</p>
+        <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.pageCalendarSub}</p>
       </div>
 
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-6 items-start">
@@ -239,7 +239,7 @@ export default function AdminCalendar({
                   <p className="text-sm font-bold text-white">
                     {dayLocked ? t.admin.lockLockedLabel : t.admin.lockDay}
                   </p>
-                  <p className="text-xs text-[#7A93B5] mt-0.5">
+                  <p className="text-xs text-[#94A3B8] mt-0.5">
                     {dayLocked ? t.admin.lockUnlockedLabel : t.admin.lockDayHint}
                   </p>
                 </div>
@@ -332,7 +332,7 @@ export default function AdminCalendar({
                 <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
                   <CalendarDay className="w-6 h-6 text-[#20B1EE]" />
                 </div>
-                <p className="mt-4 text-sm text-[#7A93B5]">{t.admin.calendarDayEmpty}</p>
+                <p className="mt-4 text-sm text-[#94A3B8]">{t.admin.calendarDayEmpty}</p>
               </div>
             )}
             {!isLoading &&
@@ -408,7 +408,7 @@ export default function AdminCalendar({
                 <div className="w-14 h-14 rounded-full bg-[#20B1EE]/10 flex items-center justify-center">
                   <CalendarDay className="w-6 h-6 text-[#20B1EE]" />
                 </div>
-                <p className="mt-4 text-sm text-[#7A93B5]">{t.admin.calendarSelectHint}</p>
+                <p className="mt-4 text-sm text-[#94A3B8]">{t.admin.calendarSelectHint}</p>
               </div>
             )}
           </div>

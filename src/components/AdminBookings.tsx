@@ -153,7 +153,7 @@ export default function AdminBookings({
   return (
     <div className="mx-auto w-full max-w-[1400px] py-2 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
           {t.admin.pageBookingsTitle}
         </h1>
         <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.pageBookingsSub}</p>
@@ -186,7 +186,7 @@ export default function AdminBookings({
       </div>
 
       <div
-        className={`${gridHead} px-4 sm:px-5 pt-6 pb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]`}
+        className={`${gridHead} px-4 sm:px-5 pt-6 pb-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]`}
       >
         <span>{t.admin.colClient}</span>
         <span>{t.admin.colDate}</span>
@@ -197,7 +197,7 @@ export default function AdminBookings({
         <span className="text-right">{t.admin.colActions}</span>
       </div>
 
-      <div className="mt-2 space-y-2">
+      <div className="mt-8 space-y-2">
         {isLoading ? (
           <div className="space-y-2">
             {[0, 1, 2].map((i) => (
@@ -240,7 +240,7 @@ export default function AdminBookings({
                 tabIndex={0}
                 onClick={() => setDetailTarget(row)}
                 onKeyDown={(e) => e.key === 'Enter' && setDetailTarget(row)}
-                className={`grid grid-cols-1 gap-y-2 gap-x-6 px-4 sm:px-5 py-4 lg:items-center lg:py-2 min-h-16 rounded-lg bg-white/[0.02] border-b border-white/[0.06] hover:bg-white/[0.04] transition-colors duration-150 cursor-pointer group ${gridCols}`}
+                className={`grid grid-cols-1 gap-y-2 gap-x-6 px-4 sm:px-5 py-4 lg:items-center lg:py-3 min-h-16 rounded-lg bg-white/[0.02] border-b border-white/[0.06] hover:bg-white/[0.04] transition-colors duration-150 cursor-pointer group ${gridCols}`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-9 h-9 shrink-0 rounded-full bg-[#20B1EE]/15 border border-[#20B1EE]/25 flex items-center justify-center text-xs font-bold text-[#20B1EE]">
@@ -388,7 +388,7 @@ export default function AdminBookings({
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white capitalize">{detailTarget.name}</p>
-                  <p className="text-xs text-[#7A93B5]">
+                  <p className="text-xs text-[#94A3B8]">
                     {formatDisplayDate(detailTarget.date)} · {detailTarget.schedule}
                   </p>
                 </div>

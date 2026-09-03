@@ -67,7 +67,7 @@ export default function AdminSettings({
   return (
     <div className="mx-auto w-full max-w-[1000px] py-2 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
           {t.admin.pageSettingsTitle}
         </h1>
         <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.pageSettingsSub}</p>

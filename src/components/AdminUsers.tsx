@@ -76,10 +76,10 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
   return (
     <div className="mx-auto w-full max-w-[1400px] py-2 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
           {t.admin.pageUsersTitle}
         </h1>
-        <p className="mt-2 text-sm text-[#7A93B5]">{t.admin.pageUsersSub}</p>
+        <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.pageUsersSub}</p>
       </div>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -88,7 +88,7 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
             key={idx}
             className="rounded-[20px] bg-[#0B1F35]/80 border border-white/[0.08] p-6 hover:border-[#20B1EE]/30 hover:-translate-y-0.5 transition-all duration-300 shadow-[0_24px_48px_-28px_rgba(0,0,0,0.9)]"
           >
-            <p className="text-[0.8rem] font-medium text-[#7A93B5]">{card.label}</p>
+            <p className="text-[0.8rem] font-medium text-[#94A3B8]">{card.label}</p>
             {isLoading ? (
               <div className="mt-2 h-8 w-16 animate-pulse rounded-md bg-white/10" />
             ) : (
@@ -110,10 +110,10 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
             <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
               {t.admin.pageUsersTitle}
             </h2>
-            <p className="mt-1.5 text-sm text-[#7A93B5]">{t.admin.sectionSubtitle}</p>
+            <p className="mt-1.5 text-sm text-[#94A3B8]">{t.admin.sectionSubtitle}</p>
           </div>
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A93B5]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
             <input
               type="text"
               value={query}
@@ -145,7 +145,7 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
               <UsersIcon className="w-6 h-6 text-[#20B1EE]" />
             </div>
             <p className="mt-4 text-base font-bold text-white">{t.admin.emptyCardTitle}</p>
-            <p className="mt-1 max-w-xs text-sm text-[#7A93B5]">{t.admin.usersEmpty}</p>
+            <p className="mt-1 max-w-xs text-sm text-[#94A3B8]">{t.admin.usersEmpty}</p>
           </div>
         ) : (
           <div className="mt-6 space-y-3">

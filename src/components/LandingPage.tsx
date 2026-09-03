@@ -269,14 +269,14 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
                   key={item.href}
                   href={item.href}
                   onClick={closeMenu}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#7A93B5] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#94A3B8] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
                 >
                   {item.label}
                 </a>
               ))}
               <button
                 onClick={() => { closeMenu(); onBookNow() }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#7A93B5] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#94A3B8] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
               >
                 <Home className="w-[18px] h-[18px] shrink-0" />
                 {t.landing.heroCta}

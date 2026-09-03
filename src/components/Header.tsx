@@ -116,7 +116,7 @@ export default function Header({
             <p className="text-[15px] font-bold tracking-tight text-white leading-tight truncate">
               Freelance Latam
             </p>
-            <p className="text-[11px] text-[#7A93B5] leading-tight truncate">
+            <p className="text-[11px] text-[#94A3B8] leading-tight truncate">
               {isAdmin ? 'Pool & Facilities' : `${title} · ${subtitle ?? ''}`}
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function Header({
                   key={item.section}
                   onClick={() => go(item.section)}
                   className={`relative flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    active ? 'text-white' : 'text-[#7A93B5] hover:text-white'
+                    active ? 'text-white' : 'text-[#94A3B8] hover:text-white'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${active ? 'text-[#20B1EE]' : ''}`} />
@@ -240,7 +240,7 @@ export default function Header({
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                           active
                             ? 'bg-[#20B1EE]/12 text-white ring-1 ring-[#20B1EE]/25'
-                            : 'text-[#7A93B5] hover:bg-white/[0.06] hover:text-white'
+                            : 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-white'
                         }`}
                       >
                         <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? 'text-[#20B1EE]' : ''}`} />
@@ -254,7 +254,7 @@ export default function Header({
                       <button
                         key={item.id}
                         onClick={() => handleFreelancerNav(item.href)}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#7A93B5] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-[#94A3B8] hover:bg-white/[0.06] hover:text-white transition-all cursor-pointer"
                       >
                         <Icon className="w-[18px] h-[18px] shrink-0" />
                         {t.header[item.key]}

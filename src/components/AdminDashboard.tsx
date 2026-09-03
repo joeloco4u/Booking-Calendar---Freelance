@@ -146,15 +146,15 @@ export default function AdminDashboard({
 
   return (
     <div className="mx-auto w-full max-w-[1400px] py-2 animate-fade-in-up">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-5">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Admin Dashboard</h1>
-          <p className="mt-2 text-sm text-[#7A93B5]">{t.admin.dashboardSubtitle}</p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">Admin Dashboard</h1>
+          <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.dashboardSubtitle}</p>
         </div>
-        <div className="inline-flex items-center self-start sm:self-auto gap-1 rounded-2xl bg-[#0B1F35] border border-white/[0.08] p-1.5 shadow-[0_12px_28px_-16px_rgba(0,0,0,0.9)]">
+        <div className="inline-flex items-center justify-center gap-1 rounded-2xl bg-[#0B1F35] border border-white/[0.08] p-1.5 shadow-[0_12px_28px_-16px_rgba(0,0,0,0.9)]">
           <button
             onClick={handlePrevMonth}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-[#7A93B5] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -167,12 +167,13 @@ export default function AdminDashboard({
           </span>
           <button
             onClick={handleNextMonth}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-[#7A93B5] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
             aria-label="Next month"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+        <div className="hidden sm:block" />
       </div>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -185,7 +186,7 @@ export default function AdminDashboard({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[0.8rem] font-medium text-[#7A93B5]">{card.label}</p>
+                  <p className="text-[0.8rem] font-medium text-[#94A3B8]">{card.label}</p>
                   {isLoading ? (
                     <div className="mt-2 h-8 w-16 animate-pulse rounded-md bg-white/10" />
                   ) : (
@@ -201,10 +202,10 @@ export default function AdminDashboard({
                 </div>
               </div>
               <span
-                className={`mt-4 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${card.badgeWrap}`}
+                className={`mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${card.badgeWrap}`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${card.dot}`} />
-                {card.badge}
+                {currentMonthStr}
               </span>
             </div>
           )
