@@ -107,7 +107,7 @@ function doGet(e) {
         name: name || '',
         date: date ? date.toString() : '',
         schedule: schedule || '',
-        fee: fee || 0,
+        fee: status === 'Maintenance' ? 0 : (fee || 0),
         note: note || '',
         status: status
       });

@@ -370,7 +370,9 @@ export default function AdminCalendar({
                       <p className="mt-2 text-xs text-[#64748B]">{row.email}</p>
                     )}
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-white tabular-nums">${row.fee > 0 ? row.fee : fee}.00</p>
+                      <p className="text-sm font-bold text-white tabular-nums">
+                        {status === 'maintenance' ? '—' : `$${row.fee > 0 ? row.fee : fee}.00`}
+                      </p>
                       {status === 'pending' && (
                         <div className="flex items-center gap-2">
                           <button

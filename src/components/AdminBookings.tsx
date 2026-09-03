@@ -64,6 +64,16 @@ export default function AdminBookings({
     [monthData],
   )
 
+  const displayData = useMemo(() => {
+    const filtered =
+      activeTab === 'pending'
+        ? pendingRequests
+        : activeTab === 'approved'
+          ? approvedRequests
+          : rejectedRequests
+    return filtered.filter((r) => r.status?.toLowerCase() !== 'maintenance')
+  }, [activeTab, pendingRequests, approvedRequests, rejectedRequests])
+
   const approvedCount = approvedRequests.length
   const rejectedCount = rejectedRequests.length
 
@@ -127,13 +137,6 @@ export default function AdminBookings({
         return status
     }
   }
-
-  const displayData =
-    activeTab === 'pending'
-      ? pendingRequests
-      : activeTab === 'approved'
-        ? approvedRequests
-        : rejectedRequests
 
   const emptyMessage =
     activeTab === 'pending'
