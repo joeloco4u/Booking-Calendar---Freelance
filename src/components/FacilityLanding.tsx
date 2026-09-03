@@ -8,7 +8,7 @@ export default function FacilityLanding({ lang }: FacilityLandingProps) {
   const t = translations[lang]
 
   return (
-    <div className="animate-fade-in-up text-center px-2">
+    <div className="animate-fade-in-up text-center px-2 pt-2 md:pt-4">
       <h1 className="text-xl md:text-3xl font-bold text-white tracking-tight text-balance leading-snug">
         {t.facility.heroTitle}{' '}
         <span className="bg-gradient-to-r from-cyan-glow to-cyan-cta bg-clip-text text-transparent">

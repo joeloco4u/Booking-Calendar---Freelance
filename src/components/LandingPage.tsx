@@ -30,6 +30,32 @@ interface LandingPageProps {
 const INCLUDED_IMAGES = [poolA, poolB, poolC, poolD]
 const STEP_ICONS = [CalendarDays, Sun, Send]
 
+function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [size, setSize] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const target = el.scrollHeight
+    if (size !== target) setSize(target)
+  })
+
+  return (
+    <div
+      ref={ref}
+      className="overflow-hidden"
+      style={{
+        height: open ? size : 0,
+        opacity: open ? 1 : 0,
+        transition: 'height 450ms cubic-bezier(0.4,0,0.2,1), opacity 300ms ease',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 function LanguageToggle({ lang, onLangChange }: { lang: Lang; onLangChange: (l: Lang) => void }) {
   return (
     <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/10">
@@ -215,7 +241,7 @@ function LandingHeader({ lang, onLangChange, onBookNow }: LandingPageProps) {
       {menuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
           <div
-            className="absolute inset-0 bg-[#020A14]/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#020A14]/90 backdrop-blur-sm"
             onClick={() => setMenuOpen(false)}
           />
           <div className="relative w-[min(85vw,360px)] h-full bg-[#0a192f] border-l border-white/[0.08] shadow-[-20px_0_60px_-20px_rgba(0,0,0,0.8)] flex flex-col animate-slide-in-right">
@@ -445,17 +471,11 @@ function Rules({ lang }: { lang: Lang }) {
                       <ChevronDown className="h-4 w-4" />
                     </span>
                   </button>
-                  <div
-                    className={`grid transition-all duration-300 ease-out ${
-                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                    }`}
-                  >
-                    <div className="overflow-hidden">
-                      <p className="px-5 pb-5 md:px-6 text-base font-medium text-[#334155] leading-relaxed md:pl-[4.75rem]">
-                        {rule.desc}
-                      </p>
-                    </div>
-                  </div>
+                  <Collapse open={isOpen}>
+                    <p className="px-5 pb-5 md:px-6 text-base font-medium text-[#334155] leading-relaxed md:pl-[4.75rem]">
+                      {rule.desc}
+                    </p>
+                  </Collapse>
                 </div>
               </Reveal>
             )
@@ -641,26 +661,45 @@ function Pricing({ lang }: { lang: Lang }) {
 
 function Faq({ lang }: { lang: Lang }) {
   const t = translations[lang]
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
 
   return (
     <section id="faq" className="bg-mist pb-24 scroll-mt-16">
       <div className="max-w-3xl mx-auto px-6">
         <SectionHeading title={t.landing.faqTitle} subtitle={t.landing.faqSub} />
         <div className="mt-12 space-y-3">
-          {t.landing.faq.map((entry, idx) => (
-            <details
-              key={idx}
-              className="group rounded-2xl bg-white border border-slate-200 px-5 py-4 open:border-cyan-glow/50 open:shadow-[0_16px_32px_-18px_rgba(8,24,43,0.35)] transition-all"
-            >
-              <summary className="flex items-center justify-between gap-4 cursor-pointer list-none">
-                <span className="text-sm md:text-base font-bold text-navy">{entry.q}</span>
-                <span className="w-7 h-7 rounded-full bg-mist flex items-center justify-center shrink-0 group-open:bg-cyan-glow/15">
-                  <ChevronDown className="w-4 h-4 text-cyan-cta transition-transform duration-200 group-open:rotate-180" />
-                </span>
-              </summary>
-              <p className="mt-3 text-sm text-slate-500 leading-relaxed pr-8">{entry.a}</p>
-            </details>
-          ))}
+          {t.landing.faq.map((entry, idx) => {
+            const open = openFaq === idx
+            return (
+              <div
+                key={idx}
+                className={`rounded-2xl bg-white border px-5 py-4 transition-all duration-500 ${
+                  open ? 'border-cyan-glow/50 shadow-[0_16px_32px_-18px_rgba(8,24,43,0.35)]' : 'border-slate-200'
+                }`}
+              >
+                <button
+                  onClick={() => setOpenFaq(open ? null : idx)}
+                  className="flex w-full items-center justify-between gap-4 cursor-pointer list-none text-left"
+                >
+                  <span className="text-sm md:text-base font-bold text-navy">{entry.q}</span>
+                  <span
+                    className={`w-7 h-7 rounded-full bg-mist flex items-center justify-center shrink-0 transition-colors duration-500 ${
+                      open ? 'bg-cyan-glow/15' : ''
+                    }`}
+                  >
+                    <ChevronDown
+                      className={`w-4 h-4 text-cyan-cta transition-transform duration-500 ${
+                        open ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </span>
+                </button>
+                <Collapse open={open}>
+                  <p className="pt-3 pr-8 text-sm text-slate-500 leading-relaxed">{entry.a}</p>
+                </Collapse>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>

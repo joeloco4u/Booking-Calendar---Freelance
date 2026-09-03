@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import {
-  Shield,
-  User,
   LayoutDashboard,
   BookCheck,
   CalendarDays,
@@ -70,11 +68,6 @@ export default function Header({
     setMenuOpen(false)
   }
 
-  const handleRoleChange = () => {
-    navigate(isAdmin ? '/booking' : '/admin')
-    setMenuOpen(false)
-  }
-
   const handleFreelancerNav = (href: string) => {
     setMenuOpen(false)
     if (href.startsWith('/#')) {
@@ -108,7 +101,7 @@ export default function Header({
   }, [menuOpen])
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 bg-[#0B1F35]/85 backdrop-blur-xl border-b border-white/[0.07]">
+    <header className="sticky top-0 z-40 shrink-0 bg-[#0B1F35] border-b border-white/[0.07]">
       <div className="h-16 px-4 md:px-6 mx-auto w-full max-w-[1400px] flex items-center justify-between gap-3">
         <Link
           to="/"
@@ -171,15 +164,7 @@ export default function Header({
             </Link>
           ) : null}
 
-          {!isAdmin && (
-            <button
-              onClick={handleRoleChange}
-              className="hidden sm:inline-flex min-w-[120px] items-center justify-center gap-2 px-4 h-9 rounded-xl bg-gradient-to-r from-[#20B1EE] to-[#1895C7] text-white text-sm font-bold shadow-[0_4px_20px_-4px_rgba(32,177,238,0.6)] hover:brightness-110 active:scale-95 transition-all cursor-pointer"
-            >
-              <Shield className="w-4 h-4" />
-              {t.header.goToAdmin}
-            </button>
-          )}
+          {!isAdmin && null}
 
           <div className="flex items-center gap-2 md:gap-3">
             <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/15">
@@ -212,7 +197,7 @@ export default function Header({
       {menuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
           <div
-            className="absolute inset-0 bg-[#020A14]/70 backdrop-blur-sm animate-fade-in"
+            className="absolute inset-0 bg-[#020A14]/90 backdrop-blur-sm animate-fade-in"
             onClick={() => setMenuOpen(false)}
           />
           <div
@@ -279,18 +264,6 @@ export default function Header({
             </nav>
 
             <div className="border-t border-white/[0.08] p-4 space-y-3 shrink-0">
-              <button
-                onClick={handleRoleChange}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-sm font-semibold text-white/80 hover:text-white transition-all cursor-pointer"
-              >
-                {isAdmin ? (
-                  <User className="w-[18px] h-[18px] shrink-0 text-white/50" />
-                ) : (
-                  <Shield className="w-[18px] h-[18px] shrink-0 text-[#20B1EE]" />
-                )}
-                {isAdmin ? t.header.mobileSwitchToUser : t.header.mobileSwitchToAdmin}
-              </button>
-
               <div className="flex items-center gap-2">
                 {(['es', 'en'] as const).map((code) => (
                   <button
