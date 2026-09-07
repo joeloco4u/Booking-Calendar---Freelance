@@ -24,6 +24,7 @@ const DEFAULT_RULES = [
   'Ducha previa obligatoria antes de ingresar a la piscina.',
   'Música a volumen adecuado que no moleste a vecinos.',
   'Sigue las instrucciones del encargado del área.',
+  'Capacidad máxima de 25 personas en la piscina.',
   'Cancelaciones con menos de 1 semana de antelación aplican una penalización de $10 USD.',
 ]
 

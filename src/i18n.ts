@@ -44,6 +44,7 @@ const es = {
       { title: 'Cuida las áreas verdes', desc: 'No coloques desechos ni vasos en jardineras ni viertas líquidos sobre las plantas.' },
       { title: 'Prohibido el papelillo', desc: 'No se permite el uso de papelillo dentro del área de la piscina.' },
       { title: 'Cancelaciones y penalización', desc: 'Cancelaciones con menos de 1 semana de antelación aplican una penalización automática de $10 USD descontados de nómina.' },
+      { title: 'Capacidad máxima 25 personas', desc: 'La piscina admite un máximo de 25 personas a la vez para garantizar seguridad y comodidad de todos.' },
     ],
     included: [
       { label: 'Cava para hielo', note: 'Sin hielo', desc: 'Mantén tus bebidas frías durante todo tu turno.' },
@@ -368,6 +369,7 @@ function makeEn(): typeof es {
         { title: 'Protect the green areas', desc: 'Do not put waste or cups in planters or pour liquids onto the plants.' },
 { title: 'No confetti', desc: 'Confetti (papelillo) is not allowed inside the pool area.' },
       { title: 'Cancellations & penalty', desc: 'Cancellations made less than 1 week in advance trigger an automatic $10 USD penalty deducted from payroll.' },
+      { title: 'Maximum capacity 25 people', desc: 'The pool allows a maximum of 25 people at a time to ensure everyone\u2019s safety and comfort.' },
     ],
       included: [
         { label: 'Ice cooler', note: 'No ice', desc: 'Keep your drinks cold throughout your slot.' },

@@ -147,7 +147,7 @@ export default function Calendar({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-[20px] bg-white/[0.05] border border-white/[0.18] p-5 md:p-6 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+    <div className="flex h-full flex-col rounded-[20px] bg-[#0B1F35]/90 border border-white/[0.1] p-5 md:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
       <div className="flex items-center justify-center gap-2 mb-5">
         <button
           onClick={onPrevMonth}

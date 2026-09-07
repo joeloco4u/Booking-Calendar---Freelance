@@ -109,6 +109,7 @@ export default function ReservationForm({
   const [email, setEmail] = useState('')
   const [extras, setExtras] = useState<string[]>([])
   const [rulesAccepted, setRulesAccepted] = useState(false)
+  const [rulesOpen, setRulesOpen] = useState(false)
   const [policyAccepted, setPolicyAccepted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -420,17 +421,56 @@ export default function ReservationForm({
                 </div>
               </div>
 
-              <label className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.08] border border-white/20 cursor-pointer active:scale-[0.99] transition-transform">
-                <input
-                  type="checkbox"
-                  checked={rulesAccepted}
-                  onChange={(e) => setRulesAccepted(e.target.checked)}
-                  className="w-4 h-4 accent-[#1895C7] mt-0.5"
-                />
-                <span className="text-xs text-white/80 leading-relaxed">
-                  <strong>{t.booking.rulesLabel}.</strong> {t.booking.rulesHint}
-                </span>
-              </label>
+              <div className="rounded-xl bg-white/[0.08] border border-white/20 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setRulesOpen((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 p-3 cursor-pointer text-left active:scale-[0.99] transition-transform"
+                >
+                  <span className="text-xs text-white/90 leading-relaxed">
+                    <strong>{t.booking.rulesLabel}.</strong> {t.booking.rulesHint}
+                  </span>
+                  <ChevronRight
+                    className={`w-4 h-4 shrink-0 text-white/60 transition-transform duration-300 ${
+                      rulesOpen ? 'rotate-90' : ''
+                    }`}
+                  />
+                </button>
+                <div
+                  className="grid transition-[grid-template-rows] duration-300 ease-out"
+                  style={{ gridTemplateRows: rulesOpen ? '1fr' : '0fr' }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-3 pb-3 pt-0.5 space-y-2">
+                      {t.facility.rules.map((rule, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2.5 rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2"
+                        >
+                          <span className="w-4 h-4 mt-0.5 rounded-full bg-[#1895C7]/20 flex items-center justify-center shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#1895C7]" />
+                          </span>
+                          <span className="text-xs text-white/75 leading-relaxed">
+                            <strong className="text-white/95">{rule.title}:</strong>{' '}
+                            {rule.desc}
+                          </span>
+                        </div>
+                      ))}
+                      <label className="flex items-start gap-2.5 p-3 rounded-lg bg-white/[0.05] border border-white/10 cursor-pointer active:scale-[0.99] transition-transform">
+                        <input
+                          type="checkbox"
+                          checked={rulesAccepted}
+                          onChange={(e) => setRulesAccepted(e.target.checked)}
+                          className="w-4 h-4 accent-[#1895C7] mt-0.5"
+                        />
+                        <span className="text-xs text-white/80 leading-relaxed">
+                          <strong>{t.booking.rulesLabel}.</strong>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <button
                 type="submit"
