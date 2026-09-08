@@ -223,6 +223,9 @@ const es = {
       'El turno Noche aplica días viernes y sábado; el turno Día aplica sábado y domingo.',
     settingsSave: 'Guardar cambios',
     settingsSaved: 'Cambios guardados',
+    reschedule: 'Reagendar',
+    selectNewSlot: 'Seleccionar nueva fecha...',
+    confirm: 'Confirmar',
   },
   landing: {
     navSections: 'Secciones',
@@ -548,6 +551,9 @@ function makeEn(): typeof es {
         'The Night slot applies on Fridays and Saturdays; the Day slot applies on Saturdays and Sundays.',
       settingsSave: 'Save changes',
       settingsSaved: 'Changes saved',
+      reschedule: 'Reschedule',
+      selectNewSlot: 'Select new slot...',
+      confirm: 'Confirm',
     },
     landing: {
       navSections: 'Sections',

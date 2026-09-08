@@ -1,6 +1,6 @@
 const GAS_URL =
   import.meta.env.VITE_GAS_URL ??
-  'https://script.google.com/macros/s/AKfycbyzh-viNlaMsSPhHhcZ7CVrMuSV5KrYJgV5B9M1V53AfzlHY_hs4aNDRPfUplmYjZanZg/exec'
+  'https://script.google.com/macros/s/AKfycby4cftJhW1b3BuU7dNmGEl_9nGQuR4LEvPPTjal8BCBxbts4vtS4yzQR2Rni8yZTOtzCw/exec'
 
 export interface MonthDataRow {
   rowIndex: number
@@ -83,6 +83,19 @@ export async function cancelBooking(
   const res = await fetch(GAS_URL, {
     method: 'POST',
     body: JSON.stringify({ action: 'cancel', row, mes }),
+  })
+  if (!res.ok) throw new Error(`POST failed: ${res.status}`)
+  return res.json()
+}
+
+export async function rescheduleBooking(
+  mes: string,
+  oldRow: number,
+  newRow: number
+): Promise<{ success: boolean; error?: string }> {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'reschedule', mes, oldRow, newRow }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()

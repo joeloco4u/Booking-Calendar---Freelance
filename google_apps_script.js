@@ -238,6 +238,38 @@ function doPost(e) {
       sheet.getRange(row, 1, 1, 6).setBackground(null); // Reset color
       return jsonResponse(e, { success: true, message: 'Booking cancelled and slot cleared' });
 
+    } else if (action === 'reschedule') {
+      var oldRow = payload.oldRow;
+      var newRow = payload.newRow;
+      if (!oldRow || !newRow) return jsonResponse(e, { success: false, error: 'Missing required fields: oldRow, newRow' });
+
+      var oldName = sheet.getRange(oldRow, 1).getValue();
+      var oldFee = sheet.getRange(oldRow, 3).getValue();
+      var oldNote = sheet.getRange(oldRow, 5).getValue();
+      var oldConciliado = sheet.getRange(oldRow, 6).getValue();
+
+      sheet.getRange(oldRow, 1).setValue('');
+      sheet.getRange(oldRow, 3).setValue('');
+      sheet.getRange(oldRow, 5).setValue('');
+      sheet.getRange(oldRow, 6).setValue(false);
+      sheet.getRange(oldRow, 1, 1, 6).setBackground(null);
+
+      sheet.getRange(newRow, 1).setValue(oldName);
+      sheet.getRange(newRow, 3).setValue(oldFee);
+      sheet.getRange(newRow, 5).setValue(oldNote);
+      sheet.getRange(newRow, 6).setValue(oldConciliado);
+
+      var rawConc = String(oldConciliado).trim().toUpperCase();
+      var isReconciled = (oldConciliado === true || rawConc === 'TRUE' || rawConc === 'VERDADERO');
+      var hasFee = (oldFee !== '' && oldFee !== 0 && oldFee != null);
+      if (isReconciled || hasFee) {
+        sheet.getRange(newRow, 1, 1, 6).setBackground('#fff2cc');
+      } else {
+        sheet.getRange(newRow, 1, 1, 6).setBackground(null);
+      }
+
+      return jsonResponse(e, { success: true, message: 'Rescheduled' });
+
     } else if (action === 'lock' || action === 'unlock') {
       var targetDate = payload.date;
       var targetSchedule = payload.schedule;

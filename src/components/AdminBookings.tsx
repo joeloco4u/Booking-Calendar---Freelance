@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Check, X, Trash2, Calendar } from 'lucide-react'
-import { approveBooking, rejectBooking, cancelBooking } from '../services/api'
+import { Check, X, Trash2, Calendar, CalendarClock } from 'lucide-react'
+import { approveBooking, rejectBooking, cancelBooking, rescheduleBooking } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { formatDisplayDate } from '../utils/date'
 import { translations, type Lang } from '../i18n'
@@ -50,6 +50,8 @@ export default function AdminBookings({
   const [detailTarget, setDetailTarget] = useState<MonthDataRow | null>(null)
   const [rejectTarget, setRejectTarget] = useState<MonthDataRow | null>(null)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
+  const [rescheduleTarget, setRescheduleTarget] = useState<number | null>(null)
+  const [selectedNewRow, setSelectedNewRow] = useState<number | null>(null)
 
   const pendingRequests = useMemo(
     () => monthData.filter((r) => r.status?.toLowerCase() === 'pending'),
@@ -76,6 +78,33 @@ export default function AdminBookings({
 
   const approvedCount = approvedRequests.length
   const rejectedCount = rejectedRequests.length
+
+  const availableSlots = useMemo(
+    () => monthData.filter((r) => r.status?.toLowerCase() === 'available'),
+    [monthData],
+  )
+
+  const handleReschedule = (row: MonthDataRow) => {
+    setRescheduleTarget(row.rowIndex)
+    setSelectedNewRow(null)
+    setDetailTarget(null)
+  }
+
+  const confirmReschedule = async (row: MonthDataRow) => {
+    if (selectedNewRow === null) return
+    setActionLoading(row.rowIndex)
+    setRescheduleTarget(null)
+    setSelectedNewRow(null)
+    onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== row.rowIndex))
+    try {
+      await rescheduleBooking(currentMonthStr, row.rowIndex, selectedNewRow)
+      onRefresh()
+    } catch {
+      onRefresh()
+    } finally {
+      setActionLoading(null)
+    }
+  }
 
   const handleApprove = async (row: MonthDataRow) => {
     if (actionLoading !== null) return
@@ -234,14 +263,14 @@ export default function AdminBookings({
               .slice(0, 2)
               .toUpperCase()
             return (
-              <div
-                key={row.rowIndex}
-                role="button"
-                tabIndex={0}
-                onClick={() => setDetailTarget(row)}
-                onKeyDown={(e) => e.key === 'Enter' && setDetailTarget(row)}
-                className={`grid grid-cols-1 gap-y-2 gap-x-6 px-4 sm:px-5 py-4 lg:items-center lg:py-3 min-h-16 rounded-lg bg-white/[0.02] border-b border-white/[0.06] hover:bg-white/[0.04] transition-colors duration-150 cursor-pointer group ${gridCols}`}
-              >
+              <div key={row.rowIndex}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setDetailTarget(row)}
+                  onKeyDown={(e) => e.key === 'Enter' && setDetailTarget(row)}
+                  className={`grid grid-cols-1 gap-y-2 gap-x-6 px-4 sm:px-5 py-4 lg:items-center lg:py-3 min-h-16 rounded-lg bg-white/[0.02] border-b border-white/[0.06] hover:bg-white/[0.04] transition-colors duration-150 cursor-pointer group ${gridCols}`}
+                >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-9 h-9 shrink-0 rounded-full bg-[#20B1EE]/15 border border-[#20B1EE]/25 flex items-center justify-center text-xs font-bold text-[#20B1EE]">
                     {initials}
@@ -339,6 +368,39 @@ export default function AdminBookings({
                           <X className="w-3.5 h-3.5" />
                           {t.admin.actionReject}
                         </button>
+                        <button
+                          onClick={() => handleReschedule(row)}
+                          disabled={actionLoading === row.rowIndex}
+                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[rgba(56,189,248,0.1)] text-[#7DD3FC] border border-[rgba(56,189,248,0.2)] text-xs font-semibold whitespace-nowrap hover:bg-[rgba(56,189,248,0.18)] active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <CalendarClock className="w-3.5 h-3.5" />
+                          {t.admin.reschedule}
+                        </button>
+                      </>
+                    ) : activeTab === 'approved' ? (
+                      <>
+                        <button
+                          onClick={() => handleReschedule(row)}
+                          disabled={actionLoading === row.rowIndex}
+                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[rgba(56,189,248,0.1)] text-[#7DD3FC] border border-[rgba(56,189,248,0.2)] text-xs font-semibold whitespace-nowrap hover:bg-[rgba(56,189,248,0.18)] active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <CalendarClock className="w-3.5 h-3.5" />
+                          {t.admin.reschedule}
+                        </button>
+                        <button
+                          onClick={() => handleCancel(row)}
+                          disabled={actionLoading === row.rowIndex}
+                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[rgba(239,68,68,0.1)] text-[#FCA5A5] border border-[rgba(239,68,68,0.2)] text-xs font-semibold whitespace-nowrap hover:bg-[rgba(239,68,68,0.18)] active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {actionLoading === row.rowIndex ? (
+                            '...'
+                          ) : (
+                            <>
+                              <Trash2 className="w-3.5 h-3.5" />
+                              {t.admin.actionCancel}
+                            </>
+                          )}
+                        </button>
                       </>
                     ) : (
                       <button
@@ -358,6 +420,39 @@ export default function AdminBookings({
                     )}
                   </div>
                 </div>
+                </div>
+                {rescheduleTarget === row.rowIndex && (
+                  <div className="px-4 sm:px-5 py-3 mb-2 rounded-lg bg-[rgba(56,189,248,0.06)] border border-[rgba(56,189,248,0.15)]">
+                    <p className="text-xs font-semibold text-[#7DD3FC] mb-2">{t.admin.reschedule}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <select
+                        value={selectedNewRow ?? ''}
+                        onChange={(e) => setSelectedNewRow(Number(e.target.value))}
+                        className="flex-1 min-w-[200px] h-9 px-3 rounded-lg bg-[#0B1F35] border border-white/15 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#20B1EE]"
+                      >
+                        <option value="" disabled>{t.admin.selectNewSlot}</option>
+                        {availableSlots.map((s) => (
+                          <option key={s.rowIndex} value={s.rowIndex}>
+                            {formatDisplayDate(s.date)} - {s.schedule}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => confirmReschedule(row)}
+                        disabled={selectedNewRow === null || actionLoading === row.rowIndex}
+                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#20B1EE] text-white text-xs font-semibold whitespace-nowrap hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {actionLoading === row.rowIndex ? '...' : t.admin.confirm}
+                      </button>
+                      <button
+                        onClick={() => { setRescheduleTarget(null); setSelectedNewRow(null) }}
+                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-white/[0.06] border border-white/15 text-white/70 text-xs font-semibold whitespace-nowrap hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer"
+                      >
+                        {t.admin.rejectCancel}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })
