@@ -216,6 +216,47 @@ function doPost(e) {
         }
       }
 
+      // 4. Notificar a los Office Managers (HTML con botón CTA)
+      var managerEmails = "Vfofficemanager.freelancelatam@gmail.com, officemanager@freelancelatam.com";
+      var managerSubject = "Nueva solicitud de reserva de Piscina - " + payload.name;
+      var managerBodyPlain = "Hola Office Manager,\n\n" +
+                             "Se ha recibido una nueva solicitud de reserva de piscina en el sistema.\n\n" +
+                             "Detalles de la solicitud:\n" +
+                             "- Cliente: " + payload.name + "\n" +
+                             "- Turno: " + payload.schedule + "\n" +
+                             "- Contacto: " + contactInfo + "\n" +
+                             "- Notas/Extras: " + (payload.note || "Ninguna") + "\n\n" +
+                             "Por favor, ingresa al Dashboard de Administración para Aprobar o Rechazar esta solicitud.\n\n" +
+                             "Sistema Automático de Reservas";
+      var managerHtmlBody = "<div style='font-family: Arial, sans-serif; color: #333; line-height: 1.6;'>" +
+                             "<h2 style='color: #20B1EE;'>Nueva solicitud de reserva</h2>" +
+                             "<p>Hola Office Manager,</p>" +
+                             "<p>Se ha recibido una nueva solicitud de reserva de piscina en el sistema.</p>" +
+                             "<div style='background-color: #f4f7f6; padding: 15px; border-radius: 8px; margin: 15px 0;'>" +
+                             "<h3 style='margin-top: 0;'>Detalles de la solicitud:</h3>" +
+                             "<ul style='margin-bottom: 0;'>" +
+                             "<li><strong>Cliente:</strong> " + payload.name + "</li>" +
+                             "<li><strong>Turno:</strong> " + payload.schedule + "</li>" +
+                             "<li><strong>Contacto:</strong> " + contactInfo + "</li>" +
+                             "<li><strong>Notas/Extras:</strong> " + (payload.note || "Ninguna") + "</li>" +
+                             "</ul>" +
+                             "</div>" +
+                             "<p>Por favor, ingresa al Dashboard de Administración para Aprobar o Rechazar esta solicitud.</p>" +
+                             "<div style='margin-top: 25px;'>" +
+                             "<a href='https://booking-calendar-freelance.vercel.app/admin' style='background-color: #20B1EE; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;'>Ir al Panel de Administración</a>" +
+                             "</div></div>";
+
+      try {
+        MailApp.sendEmail({
+          to: managerEmails,
+          subject: managerSubject,
+          body: managerBodyPlain,
+          htmlBody: managerHtmlBody
+        });
+      } catch (err) {
+        // Ignore email errors silently so the booking doesn't fail for the user
+      }
+
       return jsonResponse(e, {
         success: true,
         message: 'Booked',
