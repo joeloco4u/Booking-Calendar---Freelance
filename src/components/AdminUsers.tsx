@@ -15,14 +15,12 @@ interface ClientAgg {
   email: string
   pending: number
   approved: number
-  rejected: number
   totalSync: number
 }
 
 const STATUS_DOT: Record<string, string> = {
   pending: 'bg-[#FACC15]',
   approved: 'bg-emerald-400',
-  rejected: 'bg-red-400',
 }
 
 export default function AdminUsers({ monthData, lang, fee, isLoading = false }: AdminUsersProps) {
@@ -38,7 +36,6 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
         email: row.email ?? '',
         pending: 0,
         approved: 0,
-        rejected: 0,
         totalSync: 0,
       }
       const status = row.status?.toLowerCase()
@@ -46,11 +43,11 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
       else if (status === 'approved') {
         agg.approved += 1
         agg.totalSync += fee
-      } else if (status === 'rejected') agg.rejected += 1
+      }
       map.set(key, agg)
     }
     return [...map.values()].sort((a, b) =>
-      (b.pending + b.approved + b.rejected) - (a.pending + a.approved + a.rejected),
+      (b.pending + b.approved) - (a.pending + a.approved),
     )
   }, [monthData, fee])
 
@@ -170,7 +167,6 @@ export default function AdminUsers({ monthData, lang, fee, isLoading = false }: 
                     [
                       { key: 'pending', count: client.pending },
                       { key: 'approved', count: client.approved },
-                      { key: 'rejected', count: client.rejected },
                     ] as const
                   ).map((s) => (
                     <span

@@ -126,7 +126,7 @@ function doPost(e) {
     var payload = JSON.parse(e.postData.contents);
     var action = payload.action;
     var row = payload.row;
-    var sheetName = payload.mes;
+    var sheetName = payload.mes || payload.oldMes;
 
     if (action === 'login') {
       var password = payload.password;
@@ -226,8 +226,12 @@ function doPost(e) {
 
     } else if (action === 'reject') {
       if (!row) return jsonResponse(e, { success: false, error: 'Missing required field: row' });
-      sheet.getRange(row, 1, 1, 6).setBackground('#f4cccc');
-      return jsonResponse(e, { success: true, message: 'Rejected' });
+      sheet.getRange(row, 1).setValue(''); // Clear name
+      sheet.getRange(row, 3).setValue(''); // Clear fee
+      sheet.getRange(row, 5).setValue(''); // Clear note
+      sheet.getRange(row, 6).setValue(false); // Uncheck conciliado
+      sheet.getRange(row, 1, 1, 6).setBackground(null); // Reset color
+      return jsonResponse(e, { success: true, message: 'Rejected and slot cleared' });
 
     } else if (action === 'cancel' || action === 'clear') {
       if (!row) return jsonResponse(e, { success: false, error: 'Missing required field: row' });
@@ -239,33 +243,50 @@ function doPost(e) {
       return jsonResponse(e, { success: true, message: 'Booking cancelled and slot cleared' });
 
     } else if (action === 'reschedule') {
+      var oldMes = payload.oldMes;
       var oldRow = payload.oldRow;
+      var newMes = payload.newMes;
       var newRow = payload.newRow;
-      if (!oldRow || !newRow) return jsonResponse(e, { success: false, error: 'Missing required fields: oldRow, newRow' });
+      var applyPenalty = payload.applyPenalty === true;
+      if (!oldMes || !oldRow || !newMes || !newRow) {
+        return jsonResponse(e, { success: false, error: 'Missing required fields: oldMes, oldRow, newMes, newRow' });
+      }
 
-      var oldName = sheet.getRange(oldRow, 1).getValue();
-      var oldFee = sheet.getRange(oldRow, 3).getValue();
-      var oldNote = sheet.getRange(oldRow, 5).getValue();
-      var oldConciliado = sheet.getRange(oldRow, 6).getValue();
+      var sheetOld = ss.getSheetByName(oldMes);
+      var sheetNew = ss.getSheetByName(newMes);
+      if (!sheetOld) return jsonResponse(e, { success: false, error: 'Source sheet not found: ' + oldMes });
+      if (!sheetNew) return jsonResponse(e, { success: false, error: 'Target sheet not found: ' + newMes });
 
-      sheet.getRange(oldRow, 1).setValue('');
-      sheet.getRange(oldRow, 3).setValue('');
-      sheet.getRange(oldRow, 5).setValue('');
-      sheet.getRange(oldRow, 6).setValue(false);
-      sheet.getRange(oldRow, 1, 1, 6).setBackground(null);
+      var oldName = sheetOld.getRange(oldRow, 1).getValue();
+      var oldFee = sheetOld.getRange(oldRow, 3).getValue();
+      var oldNote = sheetOld.getRange(oldRow, 5).getValue();
+      var oldConciliado = sheetOld.getRange(oldRow, 6).getValue();
 
-      sheet.getRange(newRow, 1).setValue(oldName);
-      sheet.getRange(newRow, 3).setValue(oldFee);
-      sheet.getRange(newRow, 5).setValue(oldNote);
-      sheet.getRange(newRow, 6).setValue(oldConciliado);
+      sheetOld.getRange(oldRow, 1).setValue('');
+      sheetOld.getRange(oldRow, 3).setValue('');
+      sheetOld.getRange(oldRow, 5).setValue('');
+      sheetOld.getRange(oldRow, 6).setValue(false);
+      sheetOld.getRange(oldRow, 1, 1, 6).setBackground(null);
+
+      var baseFee = parseFloat(String(oldFee).replace(/[^0-9.-]+/g, "")) || 0;
+      var finalFee = applyPenalty ? baseFee + 10 : baseFee;
+      var finalNote = String(oldNote || '').trim();
+      if (applyPenalty) {
+        finalNote = (finalNote ? finalNote + ' | ' : '') + 'Multa $10 (Reagendamiento tardío)';
+      }
+
+      sheetNew.getRange(newRow, 1).setValue(oldName);
+      sheetNew.getRange(newRow, 3).setValue(finalFee);
+      sheetNew.getRange(newRow, 5).setValue(finalNote);
+      sheetNew.getRange(newRow, 6).setValue(oldConciliado);
 
       var rawConc = String(oldConciliado).trim().toUpperCase();
       var isReconciled = (oldConciliado === true || rawConc === 'TRUE' || rawConc === 'VERDADERO');
-      var hasFee = (oldFee !== '' && oldFee !== 0 && oldFee != null);
+      var hasFee = (finalFee !== '' && finalFee !== 0 && finalFee != null);
       if (isReconciled || hasFee) {
-        sheet.getRange(newRow, 1, 1, 6).setBackground('#fff2cc');
+        sheetNew.getRange(newRow, 1, 1, 6).setBackground('#fff2cc');
       } else {
-        sheet.getRange(newRow, 1, 1, 6).setBackground(null);
+        sheetNew.getRange(newRow, 1, 1, 6).setBackground(null);
       }
 
       return jsonResponse(e, { success: true, message: 'Rescheduled' });

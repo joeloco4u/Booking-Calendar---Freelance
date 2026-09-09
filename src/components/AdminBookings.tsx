@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
-import { Check, X, Trash2, Calendar, CalendarClock } from 'lucide-react'
-import { approveBooking, rejectBooking, cancelBooking, rescheduleBooking } from '../services/api'
+import { useState, useMemo, useEffect } from 'react'
+import { Check, X, Trash2, Calendar, CalendarClock, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { approveBooking, rejectBooking, cancelBooking, rescheduleBooking, fetchMonthData } from '../services/api'
 import type { MonthDataRow } from '../services/api'
 import { formatDisplayDate } from '../utils/date'
 import { translations, type Lang } from '../i18n'
@@ -14,6 +14,8 @@ interface AdminBookingsProps {
   rules: string[]
   fee?: number
   isLoading?: boolean
+  currentDate: Date
+  onMonthChange: (newDate: Date) => void
 }
 
 const STATUS_BADGE: Record<string, { pill: string; dot: string }> = {
@@ -25,14 +27,163 @@ const STATUS_BADGE: Record<string, { pill: string; dot: string }> = {
     pill: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20',
     dot: 'bg-emerald-400',
   },
-  rejected: {
-    pill: 'bg-red-400/10 text-red-300 border-red-400/25',
-    dot: 'bg-red-400',
-  },
   available: {
     pill: 'bg-white/[0.06] text-slate-300 border-white/10',
     dot: 'bg-slate-400',
   },
+}
+
+const MONTH_NAMES_ES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+]
+
+const formatMonth = (d: Date) => `${MONTH_NAMES_ES[d.getMonth()]} - ${d.getFullYear()}`
+
+const parseMonthStr = (s: string) => {
+  const [monthName, year] = s.split(' - ')
+  const idx = MONTH_NAMES_ES.indexOf(monthName?.trim() ?? '')
+  const y = parseInt(year ?? '', 10)
+  if (idx === -1 || isNaN(y)) return new Date()
+  return new Date(y, idx, 1)
+}
+
+const ReschedulePanel = ({
+  currentMonthStr,
+  row,
+  onConfirm,
+  onCancel,
+  confirmLabel,
+  cancelLabel,
+  loadingLabel,
+  emptyLabel,
+  penaltyLabel,
+}: {
+  currentMonthStr: string
+  row: MonthDataRow
+  onConfirm: (newMes: string, newRow: number, applyPenalty: boolean) => void
+  onCancel: () => void
+  confirmLabel: string
+  cancelLabel: string
+  loadingLabel: string
+  emptyLabel: string
+  penaltyLabel: string
+}) => {
+  const [viewDate, setViewDate] = useState(() => parseMonthStr(currentMonthStr))
+  const [availableSlots, setAvailableSlots] = useState<MonthDataRow[]>([])
+  const [loading, setLoading] = useState(false)
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
+  const [applyPenalty, setApplyPenalty] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setSelectedSlot(null)
+    const mes = formatMonth(viewDate)
+    fetchMonthData(mes)
+      .then((data) => {
+        if (cancelled) return
+        setAvailableSlots(
+          data.filter((r) => r.status?.toLowerCase() === 'available' && r.date && r.date.trim() !== ''),
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setAvailableSlots([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [viewDate])
+
+  const prevMonth = () => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
+  const nextMonth = () => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+
+  return (
+    <div className="px-4 sm:px-5 py-3 mb-2 rounded-lg bg-[rgba(56,189,248,0.06)] border border-[rgba(56,189,248,0.15)]">
+      <div className="flex items-center justify-between gap-3 mb-1">
+        <p className="text-xs font-semibold text-[#7DD3FC] truncate">
+          {row.name}
+          <span className="text-[#94A3B8] font-normal"> · {formatDisplayDate(row.date)} · {row.schedule}</span>
+        </p>
+      </div>
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={prevMonth}
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:bg-white/[0.1] transition-all cursor-pointer"
+          aria-label="Previous month"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <p className="text-xs font-semibold text-[#7DD3FC]">{formatMonth(viewDate)}</p>
+        <button
+          onClick={nextMonth}
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.06] border border-white/15 text-white/70 hover:text-white hover:bg-white/[0.1] transition-all cursor-pointer"
+          aria-label="Next month"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center gap-2 py-3 text-xs text-[#94A3B8]">
+          <Loader2 className="w-4 h-4 animate-spin text-[#20B1EE]" />
+          {loadingLabel}
+        </div>
+      ) : availableSlots.length === 0 ? (
+        <p className="py-3 text-xs text-[#64748B]">{emptyLabel}</p>
+      ) : (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {availableSlots.map((s) => {
+            const isSelected = selectedSlot === s.rowIndex
+            return (
+              <button
+                key={s.rowIndex}
+                onClick={() => setSelectedSlot(s.rowIndex)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#20B1EE] text-white border-[#20B1EE]'
+                    : 'bg-white/[0.04] text-[#E2E8F0] border-white/15 hover:bg-white/[0.08] hover:text-white'
+                }`}
+              >
+                {formatDisplayDate(s.date)} · {s.schedule}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      <label className="flex items-center gap-2 mb-3 cursor-pointer group">
+        <input
+          type="checkbox"
+          checked={applyPenalty}
+          onChange={(e) => setApplyPenalty(e.target.checked)}
+          className="w-4 h-4 accent-[#20B1EE] rounded bg-[#0B1F35] border-white/20"
+        />
+        <span className="text-xs font-semibold text-white/70 group-hover:text-white transition-colors">
+          {penaltyLabel}
+        </span>
+      </label>
+
+      <div className="flex items-center gap-2 mt-1 justify-end">
+        <button
+          onClick={onCancel}
+          className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-white/[0.06] border border-white/15 text-white/70 text-xs font-semibold whitespace-nowrap hover:text-white hover:bg-white/[0.1] transition-all cursor-pointer"
+        >
+          {cancelLabel}
+        </button>
+        <button
+          onClick={() => selectedSlot !== null && onConfirm(formatMonth(viewDate), selectedSlot, applyPenalty)}
+          disabled={selectedSlot === null}
+          className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#20B1EE] text-white text-xs font-semibold whitespace-nowrap hover:brightness-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {confirmLabel}
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminBookings({
@@ -44,14 +195,20 @@ export default function AdminBookings({
   rules,
   fee = 60,
   isLoading = false,
+  currentDate,
+  onMonthChange,
 }: AdminBookingsProps) {
   const t = translations[lang]
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending')
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending')
   const [detailTarget, setDetailTarget] = useState<MonthDataRow | null>(null)
   const [rejectTarget, setRejectTarget] = useState<MonthDataRow | null>(null)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
   const [rescheduleTarget, setRescheduleTarget] = useState<number | null>(null)
-  const [selectedNewRow, setSelectedNewRow] = useState<number | null>(null)
+
+  const handlePrevMonth = () =>
+    onMonthChange(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+  const handleNextMonth = () =>
+    onMonthChange(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
 
   const pendingRequests = useMemo(
     () => monthData.filter((r) => r.status?.toLowerCase() === 'pending'),
@@ -61,43 +218,37 @@ export default function AdminBookings({
     () => monthData.filter((r) => r.status?.toLowerCase() === 'approved'),
     [monthData],
   )
-  const rejectedRequests = useMemo(
-    () => monthData.filter((r) => r.status?.toLowerCase() === 'rejected'),
-    [monthData],
-  )
 
   const displayData = useMemo(() => {
-    const filtered =
-      activeTab === 'pending'
-        ? pendingRequests
-        : activeTab === 'approved'
-          ? approvedRequests
-          : rejectedRequests
+    const filtered = activeTab === 'pending' ? pendingRequests : approvedRequests
     return filtered.filter((r) => r.status?.toLowerCase() !== 'maintenance')
-  }, [activeTab, pendingRequests, approvedRequests, rejectedRequests])
+  }, [activeTab, pendingRequests, approvedRequests])
 
   const approvedCount = approvedRequests.length
-  const rejectedCount = rejectedRequests.length
-
-  const availableSlots = useMemo(
-    () => monthData.filter((r) => r.status?.toLowerCase() === 'available'),
-    [monthData],
-  )
 
   const handleReschedule = (row: MonthDataRow) => {
     setRescheduleTarget(row.rowIndex)
-    setSelectedNewRow(null)
     setDetailTarget(null)
   }
 
-  const confirmReschedule = async (row: MonthDataRow) => {
-    if (selectedNewRow === null) return
-    setActionLoading(row.rowIndex)
+  const handleRescheduleConfirm = async (newMes: string, newRow: number, applyPenalty: boolean) => {
+    if (!rescheduleTarget) return
+    setActionLoading(rescheduleTarget)
     setRescheduleTarget(null)
-    setSelectedNewRow(null)
-    onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== row.rowIndex))
+    onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== rescheduleTarget))
     try {
-      await rescheduleBooking(currentMonthStr, row.rowIndex, selectedNewRow)
+      const res = await rescheduleBooking(
+        currentMonthStr,
+        rescheduleTarget,
+        newMes,
+        newRow,
+        applyPenalty,
+      )
+      if (!res.success) {
+        window.alert(`Backend error: ${res.error ?? 'Unknown error'}`)
+        setActionLoading(null)
+        return
+      }
       onRefresh()
     } catch {
       onRefresh()
@@ -160,19 +311,13 @@ export default function AdminBookings({
         return t.admin.pending
       case 'approved':
         return t.admin.approved
-      case 'rejected':
-        return t.admin.rejected
       default:
         return status
     }
   }
 
   const emptyMessage =
-    activeTab === 'pending'
-      ? t.admin.emptyPending
-      : activeTab === 'approved'
-        ? t.admin.emptyApproved
-        : t.admin.emptyRejected
+    activeTab === 'pending' ? t.admin.emptyPending : t.admin.emptyApproved
 
   const gridHead =
     'hidden lg:grid grid-cols-[1.8fr_1.1fr_1.1fr_1.2fr_0.6fr_0.9fr_0.9fr] gap-x-6 items-center'
@@ -181,18 +326,41 @@ export default function AdminBookings({
 
   return (
     <div className="mx-auto w-full max-w-[1400px] py-2 animate-fade-in-up">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
-          {t.admin.pageBookingsTitle}
-        </h1>
-        <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.pageBookingsSub}</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+            {t.admin.pageBookingsTitle}
+          </h1>
+          <p className="mt-2 text-sm text-[#94A3B8]">{t.admin.pageBookingsSub}</p>
+        </div>
+        <div className="inline-flex items-center justify-center gap-1 rounded-2xl bg-[#0B1F35] border border-white/[0.08] p-1.5 shadow-[0_12px_28px_-16px_rgba(0,0,0,0.9)]">
+          <button
+            onClick={handlePrevMonth}
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span
+            key={currentMonthStr}
+            className="min-w-[150px] px-2 text-center text-sm font-semibold text-white animate-fade-in-up tabular-nums"
+          >
+            {currentMonthStr}
+          </span>
+          <button
+            onClick={handleNextMonth}
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="mt-6 flex items-center gap-1 border-b border-white/[0.1] overflow-x-auto no-scrollbar">
         {[
           { key: 'pending' as const, label: t.admin.tabPending, count: pendingRequests.length },
           { key: 'approved' as const, label: t.admin.tabApproved, count: approvedCount },
-          { key: 'rejected' as const, label: t.admin.tabRejected, count: rejectedCount },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -368,16 +536,8 @@ export default function AdminBookings({
                           <X className="w-3.5 h-3.5" />
                           {t.admin.actionReject}
                         </button>
-                        <button
-                          onClick={() => handleReschedule(row)}
-                          disabled={actionLoading === row.rowIndex}
-                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[rgba(56,189,248,0.1)] text-[#7DD3FC] border border-[rgba(56,189,248,0.2)] text-xs font-semibold whitespace-nowrap hover:bg-[rgba(56,189,248,0.18)] active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <CalendarClock className="w-3.5 h-3.5" />
-                          {t.admin.reschedule}
-                        </button>
                       </>
-                    ) : activeTab === 'approved' ? (
+                    ) : (
                       <>
                         <button
                           onClick={() => handleReschedule(row)}
@@ -402,56 +562,22 @@ export default function AdminBookings({
                           )}
                         </button>
                       </>
-                    ) : (
-                      <button
-                        onClick={() => handleCancel(row)}
-                        disabled={actionLoading === row.rowIndex}
-                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[rgba(239,68,68,0.1)] text-[#FCA5A5] border border-[rgba(239,68,68,0.2)] text-xs font-semibold whitespace-nowrap hover:bg-[rgba(239,68,68,0.18)] active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {actionLoading === row.rowIndex ? (
-                          '...'
-                        ) : (
-                          <>
-                            <Trash2 className="w-3.5 h-3.5" />
-                            {t.admin.actionCancel}
-                          </>
-                        )}
-                      </button>
                     )}
                   </div>
                 </div>
                 </div>
                 {rescheduleTarget === row.rowIndex && (
-                  <div className="px-4 sm:px-5 py-3 mb-2 rounded-lg bg-[rgba(56,189,248,0.06)] border border-[rgba(56,189,248,0.15)]">
-                    <p className="text-xs font-semibold text-[#7DD3FC] mb-2">{t.admin.reschedule}</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <select
-                        value={selectedNewRow ?? ''}
-                        onChange={(e) => setSelectedNewRow(Number(e.target.value))}
-                        className="flex-1 min-w-[200px] h-9 px-3 rounded-lg bg-[#0B1F35] border border-white/15 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#20B1EE]"
-                      >
-                        <option value="" disabled>{t.admin.selectNewSlot}</option>
-                        {availableSlots.map((s) => (
-                          <option key={s.rowIndex} value={s.rowIndex}>
-                            {formatDisplayDate(s.date)} - {s.schedule}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={() => confirmReschedule(row)}
-                        disabled={selectedNewRow === null || actionLoading === row.rowIndex}
-                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#20B1EE] text-white text-xs font-semibold whitespace-nowrap hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {actionLoading === row.rowIndex ? '...' : t.admin.confirm}
-                      </button>
-                      <button
-                        onClick={() => { setRescheduleTarget(null); setSelectedNewRow(null) }}
-                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-white/[0.06] border border-white/15 text-white/70 text-xs font-semibold whitespace-nowrap hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer"
-                      >
-                        {t.admin.rejectCancel}
-                      </button>
-                    </div>
-                  </div>
+                  <ReschedulePanel
+                    currentMonthStr={currentMonthStr}
+                    row={row}
+                    onConfirm={handleRescheduleConfirm}
+                    onCancel={() => setRescheduleTarget(null)}
+                    confirmLabel={t.admin.confirm}
+                    cancelLabel={t.admin.rejectCancel}
+                    loadingLabel={t.admin.rescheduleLoading}
+                    emptyLabel={t.admin.rescheduleEmpty}
+                    penaltyLabel={t.admin.applyLatePenalty}
+                  />
                 )}
               </div>
             )

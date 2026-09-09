@@ -322,6 +322,8 @@ function AppContent() {
                 rules={rules}
                 fee={fee}
                 isLoading={isLoading}
+                currentDate={viewDate}
+                onMonthChange={setViewDate}
               />
             ) : adminSection === 'calendar' ? (
               <AdminCalendar

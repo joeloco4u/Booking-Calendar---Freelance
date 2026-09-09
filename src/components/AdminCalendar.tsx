@@ -28,10 +28,6 @@ const STATUS_PILL: Record<string, { pill: string; dot: string }> = {
     pill: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20',
     dot: 'bg-emerald-400',
   },
-  rejected: {
-    pill: 'bg-red-400/10 text-red-300 border-red-400/25',
-    dot: 'bg-red-400',
-  },
   maintenance: {
     pill: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
     dot: 'bg-amber-400',
@@ -186,8 +182,6 @@ export default function AdminCalendar({
         return t.admin.pending
       case 'approved':
         return t.admin.approved
-      case 'rejected':
-        return t.admin.rejected
       case 'maintenance':
         return t.admin.maintenance
       default:

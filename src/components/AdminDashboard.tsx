@@ -222,6 +222,8 @@ export default function AdminDashboard({
           rules={rules}
           fee={fee}
           isLoading={isLoading}
+          currentDate={viewDate}
+          onMonthChange={setViewDate}
         />
       </div>
     </div>
