@@ -5,7 +5,6 @@ import {
   BookCheck,
   CalendarDays,
   Users,
-  Settings,
   Menu,
   X,
   Home,
@@ -35,7 +34,6 @@ const ADMIN_NAV: { section: AdminSection; key: NavKey; icon: typeof LayoutDashbo
   { section: 'bookings', key: 'navBookings', icon: BookCheck },
   { section: 'calendar', key: 'navCalendar', icon: CalendarDays },
   { section: 'users', key: 'navUsers', icon: Users },
-  { section: 'settings', key: 'navSettings', icon: Settings },
 ]
 
 type FreelancerNavKey = 'mobileNavHome' | 'mobileNavFacilities' | 'mobileNavBook' | 'mobileNavRules' | 'mobileNavFaq'

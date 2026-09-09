@@ -1,11 +1,12 @@
 const GAS_URL =
   import.meta.env.VITE_GAS_URL ??
-  'https://script.google.com/macros/s/AKfycbwrmeXBSNsT6vX8XXwoMBenAoBeAFaJO9K6k97jsv62qmavSEN2NkZi-_l-2eJgErWt6A/exec'
+  'https://script.google.com/macros/s/AKfycbwZQW1-OirCYxYXuDJHOJHpdxnQJpkj0V_jSmdLekNKkcc0daRvkIzlOsEvCPKfAGMbHg/exec'
 
 export interface MonthDataRow {
   rowIndex: number
   name: string
   email?: string
+  phone?: string
   date: string
   schedule: string
   fee: number
@@ -29,7 +30,8 @@ export async function submitBooking(payload: {
   row: number
   mes: string
   note: string
-  contact?: string
+  phone?: string
+  email?: string
   date?: string
   schedule?: string
 }): Promise<{ success: boolean; message: string }> {

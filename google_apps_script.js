@@ -155,15 +155,22 @@ function doPost(e) {
       sheet.getRange(row, 5).setValue(note);
       sheet.getRange(row, 1, 1, 6).setBackground(null);
 
-      // 2. Lógica de Envío de Correo con Rastreo de Errores
-      var contactInfo = payload.contact || '';
+      // 2. Guardar contacto en Columna 6 (Contacto)
+      var phone = payload.phone || '';
+      var email = payload.email || '';
+      var contactInfo = "";
+      if (phone) contactInfo += "Tel: " + phone;
+      if (email) contactInfo += (contactInfo ? " | " : "") + "Correo: " + email;
+      sheet.getRange(row, 6).setValue(contactInfo);
+
+      // 3. Lógica de Envío de Correo con Rastreo de Errores
       var schedule = payload.schedule || 'Turno seleccionado';
       var dateStr = payload.date || 'Fecha seleccionada';
 
       var emailSent = false;
       var emailError = null;
 
-      if (contactInfo.indexOf('@') !== -1) {
+      if (email && email.indexOf('@') !== -1) {
         try {
           var subject = "Solicitud de Reserva de Piscina - Freelance Latam";
           var htmlMessage =
@@ -199,7 +206,7 @@ function doPost(e) {
             "</div>";
 
           MailApp.sendEmail({
-            to: contactInfo,
+            to: email,
             subject: subject,
             htmlBody: htmlMessage
           });
@@ -220,8 +227,40 @@ function doPost(e) {
     } else if (action === 'approve') {
       if (!row) return jsonResponse(e, { success: false, error: 'Missing required field: row' });
       var fee = payload.fee || 60;
-      sheet.getRange(row, 3).setValue(fee);
       sheet.getRange(row, 1, 1, 6).setBackground('#fff2cc');
+      sheet.getRange(row, 3).setValue(fee);
+
+      var nombre = sheet.getRange(row, 1).getValue();
+      var fecha = sheet.getRange(row, 2).getValue();
+      var horario = sheet.getRange(row, 4).getValue();
+      var contacto = sheet.getRange(row, 6).getValue();
+
+      var email = "";
+      if (contacto) {
+        var match = String(contacto).match(/Correo:\s*([^\s|]+)/i);
+        if (match && match[1]) email = match[1].trim();
+      }
+
+      if (email) {
+        var subject = "¡Tu reserva en la piscina está confirmada!";
+        var body = "Hola " + nombre + ",\n\n" +
+                   "Nos alegra informarte que tu reserva ha sido aprobada exitosamente.\n\n" +
+                   "Detalles de tu reserva:\n" +
+                   "📅 Fecha: " + fecha + "\n" +
+                   "⏰ Turno: " + horario + "\n\n" +
+                   "Reglas importantes:\n" +
+                   "- Por favor, recuerda ducharte antes de entrar a la piscina.\n" +
+                   "- Respeta los horarios establecidos y el volumen de la música.\n" +
+                   "- Las cancelaciones con menos de 7 días de anticipación generarán una multa automática de $10 USD.\n\n" +
+                   "¡Te esperamos!\n" +
+                   "Administración";
+        try {
+          MailApp.sendEmail(email, subject, body);
+        } catch (err) {
+          // Ignore email sending errors silently
+        }
+      }
+
       return jsonResponse(e, { success: true, message: 'Approved' });
 
     } else if (action === 'reject') {

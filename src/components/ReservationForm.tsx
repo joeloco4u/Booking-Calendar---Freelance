@@ -249,7 +249,8 @@ export default function ReservationForm({
       row: matchedRow.rowIndex,
       mes: currentMonthStr,
       note: finalNote,
-      contact: email.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
       schedule: scheduleLabel,
       date: displayTitle,
     })
