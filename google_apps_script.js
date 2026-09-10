@@ -217,7 +217,30 @@ function doPost(e) {
       }
 
       // 4. Notificar a los Office Managers (HTML con botón CTA)
-      var managerEmails = "Vfofficemanager.freelancelatam@gmail.com, officemanager@freelancelatam.com";
+      var managerEmails = "";
+      try {
+        var adminSheet = ss.getSheetByName("Contacto Admin");
+        if (adminSheet) {
+          // Read A2 and B2
+          var adminData = adminSheet.getRange("A2:B2").getValues()[0];
+          var rawAdminText = (adminData[0] + " " + adminData[1]).toString();
+
+          // Extract all valid emails using regex
+          var emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+          var adminMatches = rawAdminText.match(emailRegex);
+
+          if (adminMatches && adminMatches.length > 0) {
+            managerEmails = adminMatches.join(",");
+          }
+        }
+      } catch (e) {
+        // Fail silently, fallback will catch it
+      }
+
+      // Fallback just in case the sheet is deleted, renamed, or empty
+      if (!managerEmails) {
+        managerEmails = "Vfofficemanager.freelancelatam@gmail.com, officemanager@freelancelatam.com";
+      }
       var managerSubject = "Nueva solicitud de reserva de Piscina - " + payload.name;
       var managerBodyPlain = "Hola Office Manager,\n\n" +
                              "Se ha recibido una nueva solicitud de reserva de piscina en el sistema.\n\n" +
