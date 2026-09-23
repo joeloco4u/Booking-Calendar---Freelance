@@ -58,6 +58,7 @@ export default function AdminCalendar({
   const [lockLoading, setLockLoading] = useState(false)
   const [confirmLock, setConfirmLock] = useState(false)
   const [lockTarget, setLockTarget] = useState<string>('both')
+  const [lockReason, setLockReason] = useState('')
 
   const activeSelection =
     selected &&
@@ -108,6 +109,7 @@ export default function AdminCalendar({
         selectedDateStr,
         conflictingRows.length > 0,
         lockTarget === 'both' ? undefined : lockTarget,
+        lockReason.trim() || undefined,
       )
       if (!res.success) {
         if (res.conflicts) {
@@ -117,6 +119,7 @@ export default function AdminCalendar({
         window.alert(`Backend error: ${res.error ?? 'Unknown error'}`)
         return
       }
+      setLockReason('')
       onRefresh()
     } catch {
       onRefresh()
@@ -291,6 +294,15 @@ export default function AdminCalendar({
                   )}
                 </div>
               </div>
+              {!dayLocked && (
+                <input
+                  type="text"
+                  placeholder="Optional reason"
+                  value={lockReason}
+                  onChange={(e) => setLockReason(e.target.value)}
+                  className="w-full bg-[#0B1F35] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#20B1EE] mt-2 mb-3"
+                />
+              )}
               {!dayLocked && confirmLock && conflictingRows.length > 0 && (
                 <div className="mt-3 flex items-start gap-2 rounded-xl bg-red-400/10 border border-red-400/25 p-3">
                   <X className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />

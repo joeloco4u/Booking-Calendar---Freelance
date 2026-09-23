@@ -1,6 +1,6 @@
 const GAS_URL =
   import.meta.env.VITE_GAS_URL ??
-  'https://script.google.com/macros/s/AKfycbyGIAjATG22nmLUs-JDPO62JL-C8kL9DyOGw2KrI19-WhwIAGGXMUHwyUyM-thp5dydQQ/exec'
+  'https://script.google.com/macros/s/AKfycbwlTY4LyYRBCQcKSYEVCKY2hYPTSa5mlnMnNZ6feZsasiFPiT5YA8OWo8rMj9xAkBSduA/exec'
 
 export interface MonthDataRow {
   rowIndex: number
@@ -109,7 +109,8 @@ export async function lockDay(
   mes: string,
   date: string,
   force?: boolean,
-  schedule?: string
+  schedule?: string,
+  reason?: string
 ): Promise<{
   success: boolean
   message: string
@@ -119,7 +120,7 @@ export async function lockDay(
 }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'lock', mes, date, force: !!force, schedule }),
+    body: JSON.stringify({ action: 'lock', mes, date, force: !!force, schedule, reason }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()

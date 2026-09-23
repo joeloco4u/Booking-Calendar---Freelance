@@ -398,6 +398,8 @@ function doPost(e) {
       var targetDate = payload.date;
       var targetSchedule = payload.schedule;
       var force = payload.force === true;
+      var reason = payload.reason ? String(payload.reason).trim() : 'Mantenimiento';
+      if (reason === '') reason = 'Mantenimiento';
       if (!targetDate) return jsonResponse(e, { success: false, error: 'Missing field: date' });
 
       var doLock = (action === 'lock');
@@ -440,7 +442,7 @@ function doPost(e) {
         if (doLock) {
           sheet.getRange(r, 1).setValue(MAINTENANCE_NAME);
           sheet.getRange(r, 3).setValue('');
-          sheet.getRange(r, 5).setValue('Mantenimiento');
+          sheet.getRange(r, 5).setValue(reason);
           sheet.getRange(r, 6).setValue(false);
           sheet.getRange(r, 1, 1, 6).setBackground('#fde68a');
         } else {
