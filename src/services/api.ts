@@ -1,6 +1,6 @@
 const GAS_URL =
   import.meta.env.VITE_GAS_URL ??
-  'https://script.google.com/macros/s/AKfycbwlTY4LyYRBCQcKSYEVCKY2hYPTSa5mlnMnNZ6feZsasiFPiT5YA8OWo8rMj9xAkBSduA/exec'
+  'https://script.google.com/macros/s/AKfycbzJ76y8yqQS-TefYugb40loxBeuwFOQLo8qA1fwM3iB-6hRG9kGDSSqiMNLlpoLBkYBVg/exec'
 
 export interface MonthDataRow {
   rowIndex: number

@@ -58,6 +58,30 @@ function isMaintenanceName(name) {
 }
 
 /**
+ * Validates an admin token by scanning the "Admins" sheet.
+ * Row 1 is treated as headers. Column A = Username, Column B = Password.
+ * The team can add/remove admins directly in the sheet without redeploying.
+ */
+function isValidAdmin(token) {
+  if (!token) return false;
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Admins");
+    if (!sheet) return token === 'Freelance2026'; // Fallback if sheet is deleted
+
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][1] && data[i][1].toString() === token.toString()) {
+        return true; // Password found
+      }
+    }
+  } catch (e) {
+    // Fail safely
+  }
+  return false;
+}
+
+/**
  * doGet — reads all rows from the monthly sheet and returns them with a
  * computed status. Fully wrapped in try/catch.
  */
@@ -129,12 +153,17 @@ function doPost(e) {
     var sheetName = payload.mes || payload.oldMes;
 
     if (action === 'login') {
-      var password = payload.password;
-      if (password === 'Freelance2026') {
+      if (isValidAdmin(payload.password)) {
         return jsonResponse(e, { success: true });
-      } else {
-        return jsonResponse(e, { success: false, error: 'Contraseña incorrecta' });
       }
+      return jsonResponse(e, { success: false, error: 'Contraseña incorrecta' });
+    }
+
+    // Guard protected admin actions: validate the caller's admin token against
+    // the "Admins" sheet before touching any booking data.
+    var PROTECTED_ACTIONS = ['approve', 'reject', 'cancel', 'clear', 'reschedule', 'lock', 'unlock'];
+    if (PROTECTED_ACTIONS.indexOf(action) !== -1 && !isValidAdmin(payload.adminToken)) {
+      return jsonResponse(e, { success: false, error: 'Unauthorized: Invalid admin credentials' });
     }
 
     if (!sheetName) return jsonResponse(e, { success: false, error: 'Missing field: mes' });
