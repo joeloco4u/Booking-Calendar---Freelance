@@ -104,23 +104,11 @@ function BookingView(props: {
   )
 }
 
-function RouteWatcher({ onLeaveAdmin }: { onLeaveAdmin: () => void }) {
-  const location = useLocation()
-
-  useEffect(() => {
-    if (!location.pathname.startsWith('/admin')) {
-      onLeaveAdmin()
-    }
-  }, [location.pathname, onLeaveAdmin])
-
-  return null
-}
-
 function AppContent() {
   const navigate = useNavigate()
   const [lang, setLang] = useState<Lang>('en')
   const [adminSection, setAdminSection] = useState<AdminSection>('dashboard')
-  const [adminAuthed, setAdminAuthed] = useState(false)
+  const [adminToken, setAdminToken] = useState<string>(() => sessionStorage.getItem('adminToken') || '')
   const [fee, setFee] = useState(60)
   const [rules, setRules] = useState<string[]>(DEFAULT_RULES)
   const [selectedDate, setSelectedDate] = useState<number | null>(null)
@@ -213,6 +201,11 @@ function AppContent() {
     setSchedule('')
   }
 
+  const handleAdminLogin = useCallback((token: string) => {
+    setAdminToken(token)
+    sessionStorage.setItem('adminToken', token)
+  }, [])
+
   const t = translations[lang]
 
   const handleBookNow = () => {
@@ -228,7 +221,6 @@ function AppContent() {
 
   return (
     <>
-      <RouteWatcher onLeaveAdmin={() => setAdminAuthed(false)} />
       <Routes>
       <Route
         path="/"
@@ -282,7 +274,7 @@ function AppContent() {
             onLangChange={setLang}
           >
             {error && <ErrorBanner lang={lang} onRetry={refreshData} />}
-            {!adminAuthed ? (
+            {!adminToken ? (
               <AdminDashboard
                 monthData={monthData}
                 onMonthDataChange={setMonthData}
@@ -292,7 +284,8 @@ function AppContent() {
                 viewDate={viewDate}
                 setViewDate={setViewDate}
                 authed={false}
-                onAuthed={() => setAdminAuthed(true)}
+                onAuthed={handleAdminLogin}
+                adminToken={adminToken}
                 fee={fee}
                 rules={rules}
                 isLoading={isLoading}
@@ -307,7 +300,8 @@ function AppContent() {
                 viewDate={viewDate}
                 setViewDate={setViewDate}
                 authed={true}
-                onAuthed={() => setAdminAuthed(true)}
+                onAuthed={handleAdminLogin}
+                adminToken={adminToken}
                 fee={fee}
                 rules={rules}
                 isLoading={isLoading}
@@ -319,6 +313,7 @@ function AppContent() {
                 currentMonthStr={currentMonthStr}
                 onRefresh={refreshData}
                 lang={lang}
+                adminToken={adminToken}
                 rules={rules}
                 fee={fee}
                 isLoading={isLoading}
@@ -335,6 +330,7 @@ function AppContent() {
                 currentMonthStr={currentMonthStr}
                 onRefresh={refreshData}
                 lang={lang}
+                adminToken={adminToken}
                 fee={fee}
                 isLoading={isLoading}
               />

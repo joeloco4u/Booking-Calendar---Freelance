@@ -11,6 +11,7 @@ interface AdminBookingsProps {
   currentMonthStr: string
   onRefresh: () => void
   lang: Lang
+  adminToken: string
   rules: string[]
   fee?: number
   isLoading?: boolean
@@ -192,6 +193,7 @@ export default function AdminBookings({
   currentMonthStr,
   onRefresh,
   lang,
+  adminToken,
   rules,
   fee = 60,
   isLoading = false,
@@ -242,6 +244,7 @@ export default function AdminBookings({
         rescheduleTarget,
         newMes,
         newRow,
+        adminToken,
         applyPenalty,
       )
       if (!res.success) {
@@ -265,7 +268,7 @@ export default function AdminBookings({
       prev.map((r) => (r.rowIndex === row.rowIndex ? { ...r, status: 'Approved' as const } : r)),
     )
     try {
-      await approveBooking(row.rowIndex, currentMonthStr)
+      await approveBooking(row.rowIndex, currentMonthStr, adminToken)
       onRefresh()
     } catch {
       onRefresh()
@@ -284,7 +287,7 @@ export default function AdminBookings({
     setActionLoading(rejectTarget.rowIndex)
     onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== rejectTarget.rowIndex))
     try {
-      await rejectBooking(rejectTarget.rowIndex, currentMonthStr)
+      await rejectBooking(rejectTarget.rowIndex, currentMonthStr, adminToken)
       onRefresh()
     } catch {
       onRefresh()
@@ -299,7 +302,7 @@ export default function AdminBookings({
     setDetailTarget(null)
     setActionLoading(row.rowIndex)
     onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== row.rowIndex))
-    cancelBooking(row.rowIndex, currentMonthStr)
+    cancelBooking(row.rowIndex, currentMonthStr, adminToken)
       .then(onRefresh)
       .catch(onRefresh)
       .finally(() => setActionLoading(null))

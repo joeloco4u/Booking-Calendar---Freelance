@@ -14,7 +14,8 @@ interface AdminDashboardProps {
   viewDate: Date
   setViewDate: React.Dispatch<React.SetStateAction<Date>>
   authed: boolean
-  onAuthed: () => void
+  onAuthed: (token: string) => void
+  adminToken: string
   fee: number
   rules: string[]
   isLoading?: boolean
@@ -30,6 +31,7 @@ export default function AdminDashboard({
   setViewDate,
   authed,
   onAuthed,
+  adminToken,
   fee,
   rules,
   isLoading = false,
@@ -55,8 +57,8 @@ export default function AdminDashboard({
     try {
       const res = await verifyAdminPassword(password)
       if (res.success) {
+        onAuthed(password)
         setPassword('')
-        onAuthed()
       } else {
         setError(lang === 'en' ? 'Incorrect password' : 'Contraseña incorrecta')
         setPassword('')
@@ -219,6 +221,7 @@ export default function AdminDashboard({
           currentMonthStr={currentMonthStr}
           onRefresh={onRefresh}
           lang={lang}
+          adminToken={adminToken}
           rules={rules}
           fee={fee}
           isLoading={isLoading}

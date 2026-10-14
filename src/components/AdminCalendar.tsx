@@ -15,6 +15,7 @@ interface AdminCalendarProps {
   currentMonthStr: string
   onRefresh: () => void
   lang: Lang
+  adminToken: string
   fee?: number
   isLoading?: boolean
 }
@@ -47,6 +48,7 @@ export default function AdminCalendar({
   currentMonthStr,
   onRefresh,
   lang,
+  adminToken,
   fee = 60,
   isLoading = false,
 }: AdminCalendarProps) {
@@ -107,6 +109,7 @@ export default function AdminCalendar({
       const res = await lockDay(
         currentMonthStr,
         selectedDateStr,
+        adminToken,
         conflictingRows.length > 0,
         lockTarget === 'both' ? undefined : lockTarget,
         lockReason.trim() || undefined,
@@ -135,6 +138,7 @@ export default function AdminCalendar({
       const res = await unlockDay(
         currentMonthStr,
         selectedDateStr,
+        adminToken,
         lockTarget === 'both' ? undefined : lockTarget,
       )
       if (!res.success) {
@@ -156,7 +160,7 @@ export default function AdminCalendar({
       prev.map((r) => (r.rowIndex === row.rowIndex ? { ...r, status: 'Approved' as const } : r)),
     )
     try {
-      await approveBooking(row.rowIndex, currentMonthStr)
+      await approveBooking(row.rowIndex, currentMonthStr, adminToken)
       onRefresh()
     } catch {
       onRefresh()
@@ -170,7 +174,7 @@ export default function AdminCalendar({
     setActionLoading(row.rowIndex)
     onMonthDataChange((prev) => prev.filter((r) => r.rowIndex !== row.rowIndex))
     try {
-      await rejectBooking(row.rowIndex, currentMonthStr)
+      await rejectBooking(row.rowIndex, currentMonthStr, adminToken)
       onRefresh()
     } catch {
       onRefresh()

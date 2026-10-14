@@ -56,11 +56,12 @@ export async function verifyAdminPassword(
 
 export async function approveBooking(
   row: number,
-  mes: string
+  mes: string,
+  adminToken: string
 ): Promise<{ success: boolean; message: string }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'approve', row, mes }),
+    body: JSON.stringify({ action: 'approve', row, mes, adminToken }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
@@ -68,11 +69,12 @@ export async function approveBooking(
 
 export async function rejectBooking(
   row: number,
-  mes: string
+  mes: string,
+  adminToken: string
 ): Promise<{ success: boolean; message: string }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'reject', row, mes }),
+    body: JSON.stringify({ action: 'reject', row, mes, adminToken }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
@@ -80,11 +82,12 @@ export async function rejectBooking(
 
 export async function cancelBooking(
   row: number,
-  mes: string
+  mes: string,
+  adminToken: string
 ): Promise<{ success: boolean; message: string }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'cancel', row, mes }),
+    body: JSON.stringify({ action: 'cancel', row, mes, adminToken }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
@@ -95,11 +98,12 @@ export async function rescheduleBooking(
   oldRow: number,
   newMes: string,
   newRow: number,
+  adminToken: string,
   applyPenalty?: boolean
 ): Promise<{ success: boolean; error?: string }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'reschedule', oldMes, oldRow, newMes, newRow, applyPenalty }),
+    body: JSON.stringify({ action: 'reschedule', oldMes, oldRow, newMes, newRow, applyPenalty, adminToken }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
@@ -108,6 +112,7 @@ export async function rescheduleBooking(
 export async function lockDay(
   mes: string,
   date: string,
+  adminToken: string,
   force?: boolean,
   schedule?: string,
   reason?: string
@@ -120,7 +125,7 @@ export async function lockDay(
 }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'lock', mes, date, force: !!force, schedule, reason }),
+    body: JSON.stringify({ action: 'lock', mes, date, force: !!force, schedule, reason, adminToken }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
@@ -129,11 +134,12 @@ export async function lockDay(
 export async function unlockDay(
   mes: string,
   date: string,
+  adminToken: string,
   schedule?: string
 ): Promise<{ success: boolean; message: string; rows?: number[]; error?: string }> {
   const res = await fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'unlock', mes, date, schedule }),
+    body: JSON.stringify({ action: 'unlock', mes, date, schedule, adminToken }),
   })
   if (!res.ok) throw new Error(`POST failed: ${res.status}`)
   return res.json()
