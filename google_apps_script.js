@@ -66,7 +66,7 @@ function isValidAdmin(token) {
   if (!token) return false;
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName("Admins");
+    var sheet = ss.getSheetByName("Admin Config");
     if (!sheet) return token === 'Freelance2026'; // Fallback if sheet is deleted
 
     var data = sheet.getDataRange().getValues();
@@ -248,10 +248,10 @@ function doPost(e) {
       // 4. Notificar a los Office Managers (HTML con botón CTA)
       var managerEmails = "";
       try {
-        var adminSheet = ss.getSheetByName("Contacto Admin");
+        var adminSheet = ss.getSheetByName("Admin Config");
         if (adminSheet) {
-          // Read A2 and B2
-          var adminData = adminSheet.getRange("A2:B2").getValues()[0];
+          // Read C2 and D2
+          var adminData = adminSheet.getRange("C2:D2").getValues()[0];
           var rawAdminText = (adminData[0] + " " + adminData[1]).toString();
 
           // Extract all valid emails using regex
